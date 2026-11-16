@@ -37,6 +37,7 @@ import pathlib
 import signal
 import subprocess
 import sys
+import threading
 import time
 
 HERE = pathlib.Path(__file__).resolve().parent
@@ -56,6 +57,7 @@ PER_SCENARIO = {"F5": {"workers": 4},
                 "F6": {"width": 16, "loops": 3, "latency_ms": 200}}
 HPX_FENCE_REASONS = {"target_fenced", "dispatch_failed", "fenced_at_commit"}
 POST_EFFECT_MS = 400    # F3: time between the Tier B effect and the reply
+STOP_TIMEOUT_S = 30     # bound on the coordinator's finalize, pause and stop
 
 
 def params(a):
@@ -345,6 +347,24 @@ def summarize(rec, coord, rt, inj, log, direct_path, mode):
     rec["hpx"]["hash_equal"] = rec["hpx"].get("hash") == rec["baseline"]["hash"]
 
 
+def coordinator_exit(rt, timeout_s=STOP_TIMEOUT_S):
+    """``rt.shutdown()`` with a bound: hpx::stop can hang after a peer died.
+
+    On a hang the thread is left behind; the process ends with os._exit.
+    """
+    out = {}
+    t = threading.Thread(target=lambda: out.update(zip(("finalized", "rc"),
+                                                       rt.shutdown())),
+                         daemon=True)
+    t.start()
+    t.join(timeout_s)
+    if t.is_alive():
+        return f"stop_hang_{timeout_s:g}s"
+    if out["finalized"] and out["rc"] == 0:
+        return "clean"
+    return f"stop_rc={out['rc']}" if out["finalized"] else "finalize_timeout"
+
+
 def shutdown(isl, rt, killed):
     """Stop everything that is still up; record how each locality left."""
     ex = {"workers": {}}
@@ -355,9 +375,7 @@ def shutdown(isl, rt, killed):
         else:
             r = reports.get(name)
             ex["workers"][name] = r["exit_path"] if r else "no_exit_report"
-    finalized, rc = rt.shutdown()
-    ex["coordinator"] = "clean" if finalized and rc == 0 else (
-        f"finalize_timeout rc={rc}" if not finalized else f"stop_rc={rc}")
+    ex["coordinator"] = coordinator_exit(rt)
     r = isl.stop_root()
     ex["root"] = "clean" if r else "no_exit_report"
     return ex
@@ -436,8 +454,7 @@ def coordinator_process(a):
         rec.update(completed=False, error=f"{type(ex).__name__}: {ex}"[:300])
     rec["events"] = coord.events
     write_json(tdir / f"{a.name}.json", rec)
-    finalized, rc = rt.shutdown()
-    rec["exit"] = "clean" if finalized and rc == 0 else f"finalized={finalized} rc={rc}"
+    rec["exit"] = coordinator_exit(rt)
     write_json(tdir / f"{a.name}.json", rec)
     return 0
 
