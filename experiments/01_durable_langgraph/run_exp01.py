@@ -72,9 +72,14 @@ def params(a):
 
 
 def direct_cfg(path, mode):
-    """Tier B sink settings for the initial state, or None."""
+    """Tier B sink settings for the initial state, or None.
+
+    Creates the sink file here, so the parallel searches that write to it
+    only ever open an existing WAL database.
+    """
     if not mode:
         return None
+    EffectLog(path, keyed=(mode == "keyed")).close()
     return {"path": str(path), "mode": mode, "post_ms": POST_EFFECT_MS}
 
 

@@ -43,7 +43,11 @@ class EffectLog:
         self.keyed = keyed
         self.db = sqlite3.connect(str(path), isolation_level=None,
                                   check_same_thread=False, timeout=30)
-        self.db.execute("PRAGMA journal_mode=WAL")
+        # Switching to WAL does not wait on the busy timeout, so writers that
+        # open the same new file at once can fail with "database is locked".
+        # WAL is persistent: switch only if the file is not in WAL yet.
+        if self.db.execute("PRAGMA journal_mode").fetchone()[0] != "wal":
+            self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute(SCHEMA)
         if keyed:
             self.db.execute("CREATE UNIQUE INDEX IF NOT EXISTS effects_key "
