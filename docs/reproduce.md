@@ -26,6 +26,7 @@ Versions on Rostam when the results were taken: HPX `cc2be553`, gcc 15.1.0, Pyth
 | [`phase2.md`](results/phase2.md) | coordinator loss and worker restart | `sbatch spikes/phase2/phase2.sbatch` | 217756, 217758, 217788 |
 | [`phase3.md`](results/phase3.md) | F0: HPX run equals the LangGraph baseline | `F0_ARGS="--reps 5" sbatch experiments/01_durable_langgraph/f0.sbatch` | 218812 |
 | [`phase3.md`](results/phase3.md) | unit and integration tests, F0 test included | `sbatch bench/rostam_test.sbatch` | 219462 |
+| [`phase4.md`](results/phase4.md) | failure matrix F1 to F9, 30 trials each, and the gates | `TRIALS=30 sbatch --time=04:00:00 experiments/01_durable_langgraph/exp01.sbatch` | 223238 |
 | [`overhead.md`](results/overhead.md) | dispatch overhead, Python layers | `sbatch bench/overhead.sbatch` | 219491 |
 | [`overhead.md`](results/overhead.md) | dispatch overhead, HPX-only floor | `CASES=rtt REPS=3 sbatch bench/hpx_repro/repro.sbatch` | 219492 |
 

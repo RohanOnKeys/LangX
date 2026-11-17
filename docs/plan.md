@@ -2,7 +2,7 @@
 
 Working title: durable LangGraph on HPX supervision dispatch.
 
-Status: phases 0 to 3 are done (results in [`docs/results/`](results/)). Phase 4 is next. This plan is the single source of truth for scope; findings from each phase are folded back into it.
+Status: phases 0 to 4 are done (results in [`docs/results/`](results/)). Phase 5 is next. This plan is the single source of truth for scope; findings from each phase are folded back into it.
 
 ---
 
@@ -15,9 +15,9 @@ Status: phases 0 to 3 are done (results in [`docs/results/`](results/)). Phase 4
 | RayX README and exp70 (README, gap matrix, evidence index, Slice 3B sources) | Read | exp70 by Bita; reproduction on `cc2be553` by Rohan |
 | RayX exp66 | Partly | In-process hosting model and transport |
 | LangGraph runtime, checkpointer and durable execution docs | Read | Behavior needed here checked in spike D on 1.2.16 |
-| langX phase 0 to phase 3 results | Fully | [`phase0.md`](results/phase0.md), [`phase1.md`](results/phase1.md), [`phase2.md`](results/phase2.md), [`phase3.md`](results/phase3.md) |
+| langX phase 0 to phase 4 results | Fully | [`phase0.md`](results/phase0.md), [`phase1.md`](results/phase1.md), [`phase2.md`](results/phase2.md), [`phase3.md`](results/phase3.md), [`phase4.md`](results/phase4.md) |
 
-Rule: a statement marked **[VERIFY]** is an assumption that must be checked before code depends on it. Statements marked **[p0]**, **[p1]** or **[p2]** were measured in that phase.
+Rule: a statement marked **[VERIFY]** is an assumption that must be checked before code depends on it. Statements marked **[p0]** to **[p4]** were measured in that phase.
 
 ---
 
@@ -116,7 +116,7 @@ langX: worker runtime, coordinator, commit fence, outbox, LangGraph proxies
 
 `init`, `finalize`, `discover_and_join`, `snapshot_peers`, `query_state`, `check_admission`, `await_terminal`, `dispatch_work`, and `hpx::force_disconnect` on the root.
 
-### 3.3 Behavior measured in phases 0 and 1
+### 3.3 Behavior measured in phases 0 to 4
 
 | Behavior | Finding | Source |
 | --- | --- | --- |
@@ -135,6 +135,10 @@ langX: worker runtime, coordinator, commit fence, outbox, LangGraph proxies
 | Joining a peer whose last state is terminal | Starts a new epoch on the joiner's shadow (`seed_epoch = epoch + 1`), by design | [p2] |
 | `init()` on a fenced worker | Fails with `invalid lifecycle event transition`; no in-process recovery | [p2] |
 | Worker restart after coordinator loss | Root `force_disconnect` of the old workers, fresh workers joined by the new coordinator: dispatch restored in 2.3 to 3.0 s, 15/15 | [p2] |
+| Root `force_disconnect` of a dead coordinator, on a new coordinator's request | `rc = 0`, 30/30 | [p4] |
+| Killed worker in membership | Stays after it is fenced; leaves with the root's `force_disconnect` | [p4] |
+| Coordinator `hpx::stop()` after dispatching to an already-dead worker | Does not return within 30 s, 30/30; after a worker dies mid-node the coordinator stops cleanly | [p4] |
+| Detection under load, poll timeout 500 ms | 0.99 to 1.59 s depending on the scenario, spread of a few ms within one; no healthy worker fenced in 300 trials | [p4] |
 
 ### 3.4 Gaps and how this design handles them
 
@@ -378,17 +382,17 @@ Async graphs (`ainvoke`) and async proxies, so HPX waits do not exhaust a sync t
 
 ### 9.3 Coordinator crash recovery
 
-Losing the coordinator fences every worker it joined, and a fenced worker cannot re-init supervision [p2]. F7 therefore restarts the workers. Steps 1, 2 and 4 were run in phase 2; steps 3 and 5 are planned for phase 4:
+Losing the coordinator fences every worker it joined, and a fenced worker cannot re-init supervision [p2]. F7 therefore restarts the workers. Steps 1, 2 and 4 were run in phase 2, steps 3 and 5 in phase 4 (F7, 30/30 [p4]):
 
 1. Coordinator is SIGKILLed. In-flight dispatches finish on workers and their replies go nowhere.
 2. Harness confirms the old coordinator PID is gone.
-3. A new coordinator connects as a new locality and asks the root to `force_disconnect` the old coordinator. Not yet done: in phase 2 the dead coordinator stayed in membership [p2].
+3. A new coordinator connects as a new locality and asks the root to `force_disconnect` the old coordinator: `rc = 0`, 30/30 [p4]. In phase 2, without this step, the dead coordinator stayed in membership [p2].
 4. The harness stops the old workers; the root `force_disconnect`s them; fresh workers start as new localities and the new coordinator joins them (2.3 to 3.0 s on one node [p2]).
-5. The new coordinator resumes from the checkpointer by `thread_id`. Completed sibling writes are not re-run; the interrupted node is. Outbox keys prevent re-application. Needs phase 3.
+5. The new coordinator resumes from the checkpointer by `thread_id`. Completed sibling writes are not re-run; the interrupted node is. Outbox keys prevent re-application. In phase 4 no committed task was re-run and no outbox key applied twice, 30/30 [p4].
 
 Results produced by the old workers after the coordinator loss are lost with them. An HPX change that lets a coordinator leave without fencing its workers would remove step 4. [hpx#7834](https://github.com/TheHPXProject/hpx/issues/7834) reports the underlying observer behavior and notes that a crashed coordinator would fence its workers; the clean-exit and re-init results from phase 2 are not reported upstream yet.
 
-Run F7 with `sync` durability; report `async` separately.
+Run F7 with `sync` durability; report `async` separately (not run yet).
 
 ### 9.4 Retry policy
 
@@ -532,11 +536,13 @@ Coordinator loss, by SIGKILL or clean exit, fences every worker; a fenced worker
 
 Coordinator with epoch table, bounded retry and commit fence; keyed outbox and effect log; stub LLM with recorded fixtures; `research_agent`. F0 on 2 workers equals the baseline in 5/5 runs, one commit per task, no duplicate effect. Results: [`phase3.md`](results/phase3.md).
 
-### Phase 4: failure harness
+### Phase 4: failure harness (done)
 
 `experiments/01_durable_langgraph/run_exp01.py`: process launcher, PID recording, signal injection at defined points, F1 to F9 automated, JSON lines output. `analyze_exp01.py` computes gates and metrics.
 
 Exit: G1 to G5 pass on one node.
+
+Done: G1 to G5 pass in 30/30 trials of every scenario, F1 to F9, 300 trials on one node. Results: [`phase4.md`](results/phase4.md).
 
 ### Phase 5: Rostam measurement
 
