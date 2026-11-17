@@ -1,5 +1,22 @@
 # Reproducing the results
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| TCP | Transmission Control Protocol |
+| F0 | no failure; the HPX run is compared with stock LangGraph |
+| F1 | kill before the node starts: SIGKILL the target's worker right after the coordinator picked it |
+| F2 | kill mid-node: SIGKILL the target's worker while the node runs |
+| F3 | kill after a direct effect: SIGKILL the worker after it wrote a Tier B effect, before it replied |
+| F4 | zombie: SIGSTOP the worker until it is detected as failed, then SIGCONT it |
+| F5 | multi-kill: SIGKILL 2 of 4 workers in one superstep |
+| F6 | kill and replace: SIGKILL a worker, root `force_disconnect`, a new worker joins and takes work |
+| F7 | coordinator crash: SIGKILL the coordinator mid-run; a new one resumes from the checkpoint |
+| F8 | slow, not dead: SIGSTOP a worker for less than the detection time, then SIGCONT |
+| F9 | abandoned dispatch: dispatch timeout shorter than the node; the original result arrives late |
+
 Every result in [`docs/results/`](results/) comes from a script in this repository. This page lists, per write-up, the command that produces it and the Rostam jobs it was first run as. All commands run from the repository root on Rostam.
 
 ## One-time setup

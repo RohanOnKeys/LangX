@@ -1,5 +1,24 @@
 # Phase 3 coordinator, commit fence and effects on HPX master (cc2be553)
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](../plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| LLM | large language model |
+| F0 | no failure; the HPX run is compared with stock LangGraph |
+| F1 | kill before the node starts: SIGKILL the target's worker right after the coordinator picked it |
+| F2 | kill mid-node: SIGKILL the target's worker while the node runs |
+| F3 | kill after a direct effect: SIGKILL the worker after it wrote a Tier B effect, before it replied |
+| F4 | zombie: SIGSTOP the worker until it is detected as failed, then SIGCONT it |
+| F5 | multi-kill: SIGKILL 2 of 4 workers in one superstep |
+| F6 | kill and replace: SIGKILL a worker, root `force_disconnect`, a new worker joins and takes work |
+| F7 | coordinator crash: SIGKILL the coordinator mid-run; a new one resumes from the checkpoint |
+| F8 | slow, not dead: SIGSTOP a worker for less than the detection time, then SIGCONT |
+| F9 | abandoned dispatch: dispatch timeout shorter than the node; the original result arrives late |
+| Tier A | outbox effect: the node returns an intent, the coordinator applies it after the commit fence, keyed; exactly once |
+| Tier B | direct effect: the node performs it on the worker; at least once, effectively once only with a `keyed` sink |
+
 **Date:** 2026-10-25. **Cluster:** Rostam, partition `medusa`, one node per job. **HPX:** master
 `cc2be553fac9b1f2a372f4277d7c708e70bf7eb4`. **Plan:** [`docs/plan.md`](../plan.md)
 section 16, phase 3.

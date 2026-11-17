@@ -1,5 +1,25 @@
 # Phase 0 spikes on HPX master (cc2be553)
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](../plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| OS | operating system |
+| PID | process identifier |
+| TCP | Transmission Control Protocol |
+| SIGKILL | Unix signal that kills a process at once; it cannot be caught |
+| SIGSTOP | Unix signal that freezes a process |
+| SIGCONT | Unix signal that resumes a frozen process |
+| SIGABRT | Unix signal raised when a process aborts |
+| p50 | median (50th percentile) |
+| A' | phase 0 spike: SIGKILL detection at several poll timeouts |
+| B | phase 0 spike: SIGSTOP past detection, then SIGCONT |
+| B8 | phase 0 spike: SIGSTOP shorter than detection |
+| D | phase 0 spike: LangGraph async proxies, no HPX |
+| F (spike) | phase 0 spike: `dispatch_work` called from Python |
+| Gate 0 | phase 0 exit criterion: SIGKILL detected in under 3 s, and `dispatch_work` works from Python |
+
 **Date:** 2026-10-22. **Cluster:** Rostam, partition `medusa`, one node per job. **HPX:** master
 `cc2be553fac9b1f2a372f4277d7c708e70bf7eb4`. **Plan:** [`docs/plan.md`](../plan.md)
 section 16, phase 0.

@@ -1,5 +1,16 @@
 # Dispatch overhead split on HPX master (cc2be553)
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](../plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| GIL | global interpreter lock (Python) |
+| JSON | JavaScript Object Notation |
+| RPC | remote procedure call |
+| p50 | median (50th percentile) |
+| p99 | 99th percentile |
+
 **Date:** 2026-10-25. **Cluster:** Rostam, partition `medusa`, one node per job. **HPX:** master
 `cc2be553fac9b1f2a372f4277d7c708e70bf7eb4`. **Plan:** [`docs/plan.md`](../plan.md).
 

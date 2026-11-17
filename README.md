@@ -2,6 +2,27 @@
 
 # langX
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](docs/plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| CI | continuous integration (GitHub Actions) |
+| ID | identifier |
+| LLM | large language model |
+| LSU | Louisiana State University |
+| TCP | Transmission Control Protocol |
+| F0 | no failure; the HPX run is compared with stock LangGraph |
+| F1 | kill before the node starts: SIGKILL the target's worker right after the coordinator picked it |
+| F2 | kill mid-node: SIGKILL the target's worker while the node runs |
+| F3 | kill after a direct effect: SIGKILL the worker after it wrote a Tier B effect, before it replied |
+| F4 | zombie: SIGSTOP the worker until it is detected as failed, then SIGCONT it |
+| F5 | multi-kill: SIGKILL 2 of 4 workers in one superstep |
+| F6 | kill and replace: SIGKILL a worker, root `force_disconnect`, a new worker joins and takes work |
+| F7 | coordinator crash: SIGKILL the coordinator mid-run; a new one resumes from the checkpoint |
+| F8 | slow, not dead: SIGSTOP a worker for less than the detection time, then SIGCONT |
+| F9 | abandoned dispatch: dispatch timeout shorter than the node; the original result arrives late |
+
 Research prototype: LangGraph agent steps executed on HPX localities, with HPX supervision fencing and a coordinator-side commit fence, so that a worker failure neither loses nor double-commits a step.
 
 **Status:** phases 0 to 4 are done; phase 5 (measurement across nodes) is next. The full experiment plan is in [`docs/plan.md`](docs/plan.md).

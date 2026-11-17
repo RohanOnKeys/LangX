@@ -1,5 +1,13 @@
 # hpx_impl
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](../docs/plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| AGAS | Active Global Address Space, HPX's naming service |
+| JSON | JavaScript Object Notation |
+
 Native C++ for the parts of langX that run outside Python.
 
 | Path | Purpose |

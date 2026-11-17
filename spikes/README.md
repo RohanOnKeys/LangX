@@ -1,5 +1,12 @@
 # spikes
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](../docs/plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| API | application programming interface |
+| D | phase 0 spike: LangGraph async proxies, no HPX |
+
 Code behind each phase write-up in [`docs/results/`](../docs/results/). Kept so the results can be reproduced. None of it is the langx API.
 
 | Folder | Write-up | Contents |

@@ -1,5 +1,105 @@
 # Exactly-Once Agent Steps on HPX: Experiment Plan
 
+## Acronyms and codes
+
+Every acronym and short code used in this repository, defined once here. Each other document names the ones it uses in a table under its title, with a link back here.
+
+Acronyms:
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| AGAS | Active Global Address Space, HPX's naming service |
+| API | application programming interface |
+| APEX | Autonomic Performance Environment for eXascale, an HPX tracing tool |
+| CI | continuous integration (GitHub Actions) |
+| CPU | central processing unit |
+| CRIU | Checkpoint/Restore In Userspace, a process checkpointing tool |
+| GIL | global interpreter lock (Python) |
+| GPU | graphics processing unit |
+| ID | identifier |
+| JSON | JavaScript Object Notation |
+| LLM | large language model |
+| LSU | Louisiana State University |
+| OS | operating system |
+| PEP | Python Enhancement Proposal |
+| PID | process identifier |
+| PR | pull request |
+| RPC | remote procedure call |
+| SHA | Secure Hash Algorithm (SHA-256) |
+| TCP | Transmission Control Protocol |
+| WAL | write-ahead logging, an SQLite journal mode |
+| SIGKILL | Unix signal that kills a process at once; it cannot be caught |
+| SIGSTOP | Unix signal that freezes a process |
+| SIGCONT | Unix signal that resumes a frozen process |
+| SIGABRT | Unix signal raised when a process aborts |
+| p50 | median (50th percentile) |
+| p95 | 95th percentile |
+| p99 | 99th percentile |
+
+Codes:
+
+Failure scenarios (full matrix in section 13). The target is one task of the test graph; in phase 4 it is the first search task, `search:0`.
+
+| Code | Scenario | What is done |
+| --- | --- | --- |
+| F0 | No failure | Nothing; the HPX run is compared with stock LangGraph |
+| F1 | Kill before the node starts | SIGKILL the target's worker right after the coordinator picked it |
+| F2 | Kill mid-node | SIGKILL the target's worker while the node runs |
+| F3 | Kill after a direct effect | SIGKILL the target's worker after it wrote a Tier B effect, before it replied |
+| F4 | Zombie | SIGSTOP the worker until it is detected as failed, then SIGCONT it |
+| F5 | Multi-kill | SIGKILL 2 of 4 workers in one superstep |
+| F6 | Kill and replace | SIGKILL a worker, root `force_disconnect`, a new worker joins and takes work |
+| F7 | Coordinator crash | SIGKILL the coordinator mid-run; a new coordinator resumes from the checkpoint |
+| F8 | Slow, not dead | SIGSTOP a worker for less than the detection time, then SIGCONT |
+| F9 | Abandoned dispatch | Dispatch timeout shorter than the node; the original result arrives late |
+
+Gates: checks every run must pass (full text in section 14.1).
+
+| Code | Gate | Passes when |
+| --- | --- | --- |
+| G1 | Correct result | The final state hash equals the stock LangGraph baseline |
+| G2 | Outbox exactly once | Outbox (Tier A) keys equal the baseline's and no key is applied twice |
+| G3 | No stale commit | No result is accepted from a worker after the coordinator saw it fenced |
+| G4a | Run completes | The run finishes within a bound; phase 4 used 120 s per run |
+| G4b | Exit paths | Recorded, not gated: how each process left (clean, timeout, killed by the harness) |
+| G5 | Detection from HPX only | Every fence comes from HPX state or an HPX dispatch error, never from the harness |
+
+Effects (section 4.2):
+
+| Code | Meaning |
+| --- | --- |
+| Tier A | Outbox effect: the node returns an intent, the coordinator applies it after the commit fence, keyed. Exactly once |
+| Tier B | Direct effect: the node performs it on the worker. At least once; effectively once only with an idempotency key (`keyed` sink) |
+
+Hypotheses (section 4.3):
+
+| Code | Hypothesis |
+| --- | --- |
+| H1 | HPX-dispatched nodes give the same final state as stock LangGraph |
+| H2 | a killed worker is detected and its node re-run on a survivor, no step lost |
+| H3 | a resumed frozen worker cannot commit a stale result |
+| H4 | Tier A effects are applied exactly once in every failure scenario |
+| H5 | failure-free dispatch overhead is small relative to node latency |
+| H6 | throughput scales with worker count for I/O-bound parallel branches |
+| H7 | a coordinator crash is recoverable without restarting the root |
+
+Phase 0 spikes, lettered as in the phase 0 write-up:
+
+| Code | Spike |
+| --- | --- |
+| A' | SIGKILL detection at several poll timeouts |
+| B | SIGSTOP past detection, then SIGCONT |
+| B8 | SIGSTOP shorter than detection |
+| D | LangGraph async proxies, no HPX |
+| F (spike) | `dispatch_work` called from Python |
+| Gate 0 | Phase 0 exit: SIGKILL detected in under 3 s, and `dispatch_work` works from Python |
+
+Phase 2 coordinators: **C1** is the first coordinator, the one that is killed or leaves; **C2** is the one started after it.
+
+Source tags: **[p0]** to **[p4]** mark a statement measured in that phase; **[VERIFY]** marks an assumption still to check. Follow-on work is lettered **A**, **B**, **C** (section 20), not to be confused with phases or spikes.
+
+
 Working title: durable LangGraph on HPX supervision dispatch.
 
 Status: phases 0 to 4 are done (results in [`docs/results/`](results/)). Phase 5 is next. This plan is the single source of truth for scope; findings from each phase are folded back into it.

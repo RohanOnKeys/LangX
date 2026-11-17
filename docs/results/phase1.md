@@ -1,5 +1,17 @@
 # Phase 1 bindings core on HPX master (cc2be553)
 
+Acronyms and codes used in this document (full list: [plan, acronyms and codes](../plan.md#acronyms-and-codes)):
+
+| Term | Meaning |
+| --- | --- |
+| HPX | High Performance ParalleX, the C++ runtime langX runs on |
+| GIL | global interpreter lock (Python) |
+| JSON | JavaScript Object Notation |
+| OS | operating system |
+| TCP | Transmission Control Protocol |
+| SIGKILL | Unix signal that kills a process at once; it cannot be caught |
+| F7 | coordinator crash: SIGKILL the coordinator mid-run; a new one resumes from the checkpoint |
+
 **Date:** 2026-10-22. **Cluster:** Rostam, partition `medusa`, one node per job. **HPX:** master
 `cc2be553fac9b1f2a372f4277d7c708e70bf7eb4`. **Plan:** [`docs/plan.md`](../plan.md)
 section 16, phase 1.
