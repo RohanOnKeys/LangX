@@ -1,5 +1,16 @@
 # Phase 0 spikes on HPX master (cc2be553)
 
+Codes used in this document (full list: [plan, codes](../plan.md#codes)):
+
+| Code | Meaning |
+| --- | --- |
+| A' | phase 0 spike: SIGKILL detection at several poll timeouts |
+| B | phase 0 spike: SIGSTOP past detection, then SIGCONT |
+| B8 | phase 0 spike: SIGSTOP shorter than detection |
+| D | phase 0 spike: LangGraph async proxies, no HPX |
+| F (spike) | phase 0 spike: `dispatch_work` called from Python |
+| Gate 0 | phase 0 exit criterion: SIGKILL detected in under 3 s, and `dispatch_work` works from Python |
+
 **Date:** 2026-10-22. **Cluster:** Rostam, partition `medusa`, one node per job. **HPX:** master
 `cc2be553fac9b1f2a372f4277d7c708e70bf7eb4`. **Plan:** [`docs/plan.md`](../plan.md)
 section 16, phase 0.

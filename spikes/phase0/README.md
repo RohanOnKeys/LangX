@@ -1,5 +1,16 @@
 # Phase 0 spikes
 
+Codes used in this document (full list: [plan, codes](../../docs/plan.md#codes)):
+
+| Code | Meaning |
+| --- | --- |
+| A' | phase 0 spike: SIGKILL detection at several poll timeouts |
+| B | phase 0 spike: SIGSTOP past detection, then SIGCONT |
+| B8 | phase 0 spike: SIGSTOP shorter than detection |
+| D | phase 0 spike: LangGraph async proxies, no HPX |
+| F (spike) | phase 0 spike: `dispatch_work` called from Python |
+| Gate 0 | phase 0 exit criterion: SIGKILL detected in under 3 s, and `dispatch_work` works from Python |
+
 The code behind [`docs/results/phase0.md`](../../docs/results/phase0.md). Kept so those results can be reproduced. It is not the langx API: the bindings were rewritten in [`python/`](../../python/) and [`hpx_impl/`](../../hpx_impl/) in phase 1, and the HPX reproducers were rewritten in [`bench/hpx_repro/`](../../bench/hpx_repro/).
 
 | Spike | Question | Where |

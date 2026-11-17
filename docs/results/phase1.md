@@ -1,5 +1,11 @@
 # Phase 1 bindings core on HPX master (cc2be553)
 
+Codes used in this document (full list: [plan, codes](../plan.md#codes)):
+
+| Code | Meaning |
+| --- | --- |
+| F7 | coordinator crash: SIGKILL the coordinator mid-run; a new one resumes from the checkpoint |
+
 **Date:** 2026-10-22. **Cluster:** Rostam, partition `medusa`, one node per job. **HPX:** master
 `cc2be553fac9b1f2a372f4277d7c708e70bf7eb4`. **Plan:** [`docs/plan.md`](../plan.md)
 section 16, phase 1.
