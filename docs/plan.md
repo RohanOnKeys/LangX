@@ -1,43 +1,8 @@
 # Exactly-Once Agent Steps on HPX: Experiment Plan
 
-## Acronyms and codes
+## Codes
 
-Every acronym and short code used in this repository, defined once here. Each other document names the ones it uses in a table under its title, with a link back here.
-
-Acronyms:
-
-| Term | Meaning |
-| --- | --- |
-| HPX | High Performance ParalleX, the C++ runtime langX runs on |
-| AGAS | Active Global Address Space, HPX's naming service |
-| API | application programming interface |
-| APEX | Autonomic Performance Environment for eXascale, an HPX tracing tool |
-| CI | continuous integration (GitHub Actions) |
-| CPU | central processing unit |
-| CRIU | Checkpoint/Restore In Userspace, a process checkpointing tool |
-| GIL | global interpreter lock (Python) |
-| GPU | graphics processing unit |
-| ID | identifier |
-| JSON | JavaScript Object Notation |
-| LLM | large language model |
-| LSU | Louisiana State University |
-| OS | operating system |
-| PEP | Python Enhancement Proposal |
-| PID | process identifier |
-| PR | pull request |
-| RPC | remote procedure call |
-| SHA | Secure Hash Algorithm (SHA-256) |
-| TCP | Transmission Control Protocol |
-| WAL | write-ahead logging, an SQLite journal mode |
-| SIGKILL | Unix signal that kills a process at once; it cannot be caught |
-| SIGSTOP | Unix signal that freezes a process |
-| SIGCONT | Unix signal that resumes a frozen process |
-| SIGABRT | Unix signal raised when a process aborts |
-| p50 | median (50th percentile) |
-| p95 | 95th percentile |
-| p99 | 99th percentile |
-
-Codes:
+Every short code this project defines, named once here. Each other document repeats the ones it uses in a table under its title, with a link back here.
 
 Failure scenarios (full matrix in section 13). The target is one task of the test graph; in phase 4 it is the first search task, `search:0`.
 

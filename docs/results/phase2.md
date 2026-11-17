@@ -1,11 +1,9 @@
 # Phase 2 coordinator loss on HPX master (cc2be553)
 
-Acronyms and codes used in this document (full list: [plan, acronyms and codes](../plan.md#acronyms-and-codes)):
+Codes used in this document (full list: [plan, codes](../plan.md#codes)):
 
-| Term | Meaning |
+| Code | Meaning |
 | --- | --- |
-| HPX | High Performance ParalleX, the C++ runtime langX runs on |
-| SIGKILL | Unix signal that kills a process at once; it cannot be caught |
 | F7 | coordinator crash: SIGKILL the coordinator mid-run; a new one resumes from the checkpoint |
 | H7 | hypothesis: a coordinator crash is recoverable without restarting the root |
 | C1 | the first coordinator, the one that is killed or leaves (phase 2) |

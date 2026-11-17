@@ -1,18 +1,9 @@
 # Phase 0 spikes on HPX master (cc2be553)
 
-Acronyms and codes used in this document (full list: [plan, acronyms and codes](../plan.md#acronyms-and-codes)):
+Codes used in this document (full list: [plan, codes](../plan.md#codes)):
 
-| Term | Meaning |
+| Code | Meaning |
 | --- | --- |
-| HPX | High Performance ParalleX, the C++ runtime langX runs on |
-| OS | operating system |
-| PID | process identifier |
-| TCP | Transmission Control Protocol |
-| SIGKILL | Unix signal that kills a process at once; it cannot be caught |
-| SIGSTOP | Unix signal that freezes a process |
-| SIGCONT | Unix signal that resumes a frozen process |
-| SIGABRT | Unix signal raised when a process aborts |
-| p50 | median (50th percentile) |
 | A' | phase 0 spike: SIGKILL detection at several poll timeouts |
 | B | phase 0 spike: SIGSTOP past detection, then SIGCONT |
 | B8 | phase 0 spike: SIGSTOP shorter than detection |

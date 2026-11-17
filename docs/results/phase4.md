@@ -1,18 +1,9 @@
 # Phase 4 failure harness, F1 to F9, on HPX master (cc2be553)
 
-Acronyms and codes used in this document (full list: [plan, acronyms and codes](../plan.md#acronyms-and-codes)):
+Codes used in this document (full list: [plan, codes](../plan.md#codes)):
 
-| Term | Meaning |
+| Code | Meaning |
 | --- | --- |
-| HPX | High Performance ParalleX, the C++ runtime langX runs on |
-| ID | identifier |
-| PID | process identifier |
-| PR | pull request |
-| WAL | write-ahead logging, an SQLite journal mode |
-| SIGKILL | Unix signal that kills a process at once; it cannot be caught |
-| SIGSTOP | Unix signal that freezes a process |
-| SIGCONT | Unix signal that resumes a frozen process |
-| p95 | 95th percentile |
 | F0 | no failure; the HPX run is compared with stock LangGraph |
 | F1 | kill before the node starts: SIGKILL the target's worker right after the coordinator picked it |
 | F2 | kill mid-node: SIGKILL the target's worker while the node runs |
