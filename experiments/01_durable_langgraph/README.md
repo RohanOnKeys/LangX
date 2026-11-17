@@ -1,6 +1,6 @@
 # exp01: durable LangGraph on HPX supervision dispatch
 
-**Status:** F0 passes on 2 workers ([`phase3.md`](../../docs/results/phase3.md)); F1 to F9 are phase 4. Design and gates are in [`docs/plan.md`](../../docs/plan.md).
+**Status:** F0 passes on 2 workers ([`phase3.md`](../../docs/results/phase3.md)); F1 to F9 pass G1 to G5 in 30/30 trials each on one node ([`phase4.md`](../../docs/results/phase4.md)). Design and gates are in [`docs/plan.md`](../../docs/plan.md).
 
 ## Question
 
