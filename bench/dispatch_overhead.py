@@ -17,12 +17,16 @@ The HPX-only floor (C++ to C++, no Python) is the ``rtt`` case of
 bench/hpx_repro. Prints one JSON line.
 
     python bench/dispatch_overhead.py --n 2000
+
+With ``--worker-node NODE`` (inside a Slurm allocation) the worker runs on
+that node and the root and coordinator on this one, over TCP between nodes.
 """
 
 import argparse
 import asyncio
 import json
 import pathlib
+import socket
 import statistics
 import sys
 import tempfile
@@ -93,14 +97,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--n", type=int, default=2000)
     ap.add_argument("--workdir", default="")
+    ap.add_argument("--worker-node", default="",
+                    help="Slurm node for the worker; default this host")
     a = ap.parse_args()
-    isl = Island(a.workdir or tempfile.mkdtemp(), n_workers=1,
+    host = socket.gethostname() if a.worker_node else "localhost"
+    # A worker on another node writes its ready file here: shared file system.
+    runs = REPO / "bench" / "_runs"
+    runs.mkdir(exist_ok=True)
+    isl = Island(a.workdir or tempfile.mkdtemp(dir=runs), n_workers=1,
                  poll_timeout_ms=500, preload=["nodes:echo"],
-                 pythonpath=[NODE_DIR]).start()
-    rec = {"n": a.n, "payload_bytes": len(PAYLOAD)}
+                 pythonpath=[NODE_DIR], host=host,
+                 worker_nodes=[a.worker_node] if a.worker_node else ()).start()
+    rec = {"n": a.n, "payload_bytes": len(PAYLOAD), "coordinator": host,
+           "worker": a.worker_node or host}
     try:
         rt = Runtime()
-        rt.start(isl.agas, f"localhost:{free_port()}")
+        rt.start(isl.agas, f"{host}:{free_port()}")
         rt.init(5.0, 0.5)
         w = next(iter(isl.workers().values()))
         peer = rt.wait_for_peers([w["locality"]])[w["locality"]]

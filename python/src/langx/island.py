@@ -42,12 +42,21 @@ class Island:
 
     ``preload`` lists the ``module:function`` nodes each worker resolves at
     startup; ``pythonpath`` adds directories where those modules live.
+
+    Across nodes: ``host`` is this node's name, used for the root's address,
+    and ``worker_nodes`` lists the Slurm nodes workers go to, in turn; a
+    worker on another node is started through ``srun`` inside the current
+    allocation. ``workdir`` must then be on a shared file system.
     """
 
     def __init__(self, workdir, n_workers=2, poll_timeout_ms=500, threads=4,
                  worker_discovery_ms=0, worker_args=(), root_args=(),
-                 preload=(), pythonpath=(), env=None):
+                 preload=(), pythonpath=(), env=None, host=HOST,
+                 worker_nodes=()):
         self.dir = pathlib.Path(workdir)
+        self.host = host
+        self.worker_nodes = list(worker_nodes)
+        self.nodes = {}
         self.n_workers = n_workers
         self.worker_discovery_ms = worker_discovery_ms
         # Extra worker flags; "{dir}" and "{name}" are filled in per worker.
@@ -60,7 +69,7 @@ class Island:
         self.poll_ms = poll_timeout_ms
         self.threads = threads
         self.root_port = free_port()
-        self.agas = f"{HOST}:{self.root_port}"
+        self.agas = f"{host}:{self.root_port}"
         self.procs = {}
         self.ready = {}
 
@@ -89,15 +98,27 @@ class Island:
             self.start_worker(f"w{i}")
         return self
 
-    def start_worker(self, name):
-        """Start one worker and wait for its ready file. Returns its info."""
+    def start_worker(self, name, node=None):
+        """Start one worker and wait for its ready file. Returns its info.
+
+        ``node`` places it on that Slurm node; by default the next entry of
+        ``worker_nodes``, or this host if there are none.
+        """
+        if node is None and self.worker_nodes:
+            node = self.worker_nodes[len(self.nodes) % len(self.worker_nodes)]
+        self.nodes[name] = node
         env = dict(os.environ, **self.extra_env)
         env["PYTHONPATH"] = os.pathsep.join(
             [str(REPO / "python" / "src"), *self.pythonpath,
              env.get("PYTHONPATH", "")])
+        # A free port on this host is only a guess for another node; the
+        # nodes of an exclusive allocation run nothing else.
+        prefix = (["srun", "--nodes=1", "--ntasks=1", f"--nodelist={node}",
+                   "--overlap", "--export=ALL"] if node else [])
         self._popen(name, [
-            sys.executable, "-m", "langx.worker", "--agas", self.agas,
-            "--hpx", f"{HOST}:{free_port()}", "--threads", str(self.threads),
+            *prefix, sys.executable, "-m", "langx.worker", "--agas", self.agas,
+            "--hpx", f"{node or self.host}:{free_port()}",
+            "--threads", str(self.threads),
             "--poll-timeout-ms", str(self.poll_ms),
             "--discovery-timeout-ms", str(self.worker_discovery_ms),
             *(["--preload", *self.preload] if self.preload else []),
@@ -116,6 +137,10 @@ class Island:
 
     def kill(self, name):
         """SIGKILL one process."""
+        if self.nodes.get(name):
+            raise NotImplementedError(f"{name} runs on {self.nodes[name]}; "
+                                      "killing a worker on another node is "
+                                      "not supported yet")
         os.kill(self.procs[name].pid, signal.SIGKILL)
         self.procs[name].wait(5)
 
@@ -133,6 +158,17 @@ class Island:
 
     def cleanup(self):
         """Kill anything still running."""
+        # srun passes SIGTERM on to a worker on another node; SIGKILL would
+        # only end srun and leave the worker running there.
+        remote = [p for n, p in self.procs.items()
+                  if self.nodes.get(n) and p.poll() is None]
+        for p in remote:
+            p.terminate()
+        for p in remote:
+            try:
+                p.wait(5)
+            except subprocess.TimeoutExpired:
+                pass
         for p in self.procs.values():
             if p.poll() is None:
                 try:

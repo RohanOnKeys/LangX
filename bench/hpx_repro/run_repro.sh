@@ -5,13 +5,19 @@
 #
 # Each rep: fresh directory and ports, root first, then A and B in the order
 # the case needs, SIGKILL of B (except the epoch case), then the A and root
-# output. All processes run on this host.
+# output. All processes run on this host, unless B_NODE names another Slurm
+# node of the current allocation: B then runs there through srun (rtt only,
+# since the other cases kill B with a local signal).
 
 set -u
 BIN=$1 OUT=$2 CASE=$3 REPS=$4
 shift 4
 EXTRA="$*"
 COMMON="--hpx:bind=none --hpx:ignore-batch-env --hpx:threads=4"
+B_NODE=${B_NODE:-}
+if [ -n "$B_NODE" ] && [ "$CASE" != rtt ]; then echo "B_NODE is for the rtt case only"; exit 2; fi
+H=localhost
+[ -n "$B_NODE" ] && H=$(hostname)
 
 port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])'; }
 wait_f() { for _ in $(seq 1200); do [ -f "$1" ] && return 0; sleep 0.05; done; return 1; }
@@ -23,11 +29,16 @@ for REP in $(seq 1 "$REPS"); do
   RP=$(port)
   ARGS="--r-dir $D --r-case $CASE --r-poll-ms 500 $EXTRA"
   start() {
-    "$BIN" --r-role "$1" --hpx:agas=localhost:$RP --hpx:hpx=localhost:$(port) \
+    local host=$H pre=""
+    if [ "$1" = b ] && [ -n "$B_NODE" ]; then
+      host=$B_NODE
+      pre="srun --nodes=1 --ntasks=1 --nodelist=$B_NODE --overlap --export=ALL"
+    fi
+    $pre "$BIN" --r-role "$1" --hpx:agas=$H:$RP --hpx:hpx=$host:$(port) \
       $COMMON $ARGS > "$D/$1.log" 2>&1 &
   }
 
-  "$BIN" --r-role root --hpx:agas=localhost:$RP --hpx:hpx=localhost:$RP \
+  "$BIN" --r-role root --hpx:agas=$H:$RP --hpx:hpx=$H:$RP \
     --hpx:expect-connecting-localities $COMMON $ARGS > "$D/root.log" 2>&1 &
   ROOT=$!
   if ! wait_f "$D/root.ready"; then echo "rep $REP: root did not start"; kill -9 $ROOT; continue; fi
@@ -71,6 +82,8 @@ for REP in $(seq 1 "$REPS"); do
 
   echo "== $CASE $EXTRA rep $REP"
   grep -h '^R:' "$D/b.log" "$D/a.log" "$D/root.log" | grep -v ' done$'
+  # srun passes SIGTERM on to B on its node; SIGKILL would only end srun.
+  [ -n "$B_NODE" ] && { kill $B 2>/dev/null; sleep 1; }
   kill -9 $A $B $ROOT 2>/dev/null
   wait 2>/dev/null
 done
