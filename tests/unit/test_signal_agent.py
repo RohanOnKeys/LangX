@@ -1,4 +1,4 @@
-"""Signal helper used to reach workers on other nodes, served in-process."""
+"""Helper used to reach workers on other nodes, served in-process."""
 
 import pathlib
 import signal
@@ -11,7 +11,7 @@ import pytest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "python" / "src"))
 
-from langx.signal_agent import request, serve  # noqa: E402
+from langx.signal_agent import read, request, serve  # noqa: E402
 
 pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="POSIX signals")
 
@@ -40,6 +40,13 @@ def test_stop_and_continue(agent):
     finally:
         child.kill()
         child.wait(10)
+
+
+def test_read_returns_the_text_or_none(agent, tmp_path):
+    f = tmp_path / "w1.ready"
+    assert read(*agent, str(f)) is None
+    f.write_text('{"locality": 2}\nsecond line')
+    assert read(*agent, str(f)) == '{"locality": 2}\nsecond line'
 
 
 def test_errors_are_reported(agent):

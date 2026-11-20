@@ -131,32 +131,60 @@ class Island:
             "--stop-file", str(self.dir / f"{name}.stop"),
             *(x.format(dir=self.dir, name=name) for x in self.worker_args)],
             env=env)
-        self.ready[name] = wait_json(self.dir / f"{name}.ready", 60)
+        self.ready[name] = self._wait_json(node, self.dir / f"{name}.ready", 60)
         if self.ready[name] is None:
             raise RuntimeError(f"{name} did not start")
         return self.ready[name]
+
+    def _wait_json(self, node, path, timeout_s):
+        """``wait_json`` for a file written on ``node``.
+
+        A file another node writes can take tens of seconds to show up here
+        on a shared file system, so it is read by that node's helper.
+        """
+        if not node:
+            return wait_json(path, timeout_s)
+        from langx.signal_agent import read  # noqa: PLC0415
+        deadline = time.monotonic() + timeout_s
+        while time.monotonic() < deadline:
+            text = read(node, self.agents[node], str(path))
+            if text:
+                try:
+                    return json.loads(text)
+                except ValueError:
+                    pass   # caught mid-write
+            time.sleep(0.05)
+        return None
 
     def workers(self):
         """Worker name -> ready info (locality, epoch, pid)."""
         return {k: v for k, v in self.ready.items() if k != "root"}
 
     def _agent(self, node):
-        """Start the signal helper on ``node`` once; remember its port."""
+        """Start the helper on ``node`` once; it reports its port over TCP."""
         if node in self.agents:
             return
-        ready = self.dir / f"agent-{node}.ready"
         log = open(self.dir / f"agent-{node}.log", "w")
         env = dict(os.environ)
         env["PYTHONPATH"] = os.pathsep.join([str(REPO / "python" / "src"),
                                              env.get("PYTHONPATH", "")])
-        self.agent_procs[node] = subprocess.Popen(
-            ["srun", "--nodes=1", "--ntasks=1", f"--nodelist={node}", "--overlap",
-             "--export=ALL", sys.executable, "-m", "langx.signal_agent",
-             "--ready-file", str(ready)],
-            stdout=log, stderr=subprocess.STDOUT, env=env, start_new_session=True)
-        info = wait_json(ready, 60)
-        if info is None:
-            raise RuntimeError(f"signal helper on {node} did not start")
+        with socket.socket() as listener:
+            listener.bind(("", 0))
+            listener.listen(1)
+            listener.settimeout(60)
+            report = f"{self.host}:{listener.getsockname()[1]}"
+            self.agent_procs[node] = subprocess.Popen(
+                ["srun", "--nodes=1", "--ntasks=1", f"--nodelist={node}",
+                 "--overlap", "--export=ALL", sys.executable, "-m",
+                 "langx.signal_agent", "--report", report],
+                stdout=log, stderr=subprocess.STDOUT, env=env,
+                start_new_session=True)
+            try:
+                conn, _ = listener.accept()
+            except socket.timeout:
+                raise RuntimeError(f"helper on {node} did not report") from None
+            with conn:
+                info = json.loads(conn.makefile().readline())
         self.agents[node] = info["port"]
 
     def signal(self, name, sig):
@@ -187,8 +215,14 @@ class Island:
         """Ask live workers to leave; return their exit reports."""
         live = [n for n in self.workers() if self.procs[n].poll() is None]
         for n in live:
-            (self.dir / f"{n}.stop").touch()
-        return {n: wait_json(self.dir / f"{n}.ready.exit", timeout_s) for n in live}
+            if self.nodes.get(n):
+                # A stop file would reach the other node late; SIGTERM is
+                # the worker's other way to be asked to leave.
+                self.signal(n, signal.SIGTERM)
+            else:
+                (self.dir / f"{n}.stop").touch()
+        return {n: self._wait_json(self.nodes.get(n), self.dir / f"{n}.ready.exit",
+                                   timeout_s) for n in live}
 
     def stop_root(self, timeout_s=20):
         """Ask the root to leave; return its exit report."""
