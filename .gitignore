@@ -26,6 +26,7 @@ compile_commands.json
 # Run results / generated artifacts
 results/
 !docs/results/
+!experiments/*/results/
 experiments/**/_runs/
 bench/**/_runs/
 bench/hpx_repro/build_*/
