@@ -1,4 +1,4 @@
-"""Launch an island on this host: langx_root and workers, in connect mode.
+"""Launch an island: langx_root and workers, in connect mode.
 
 The calling process is usually the coordinator. Root and workers write ready
 files with their PIDs and epochs, and ``<ready>.exit`` files on shutdown.
@@ -46,7 +46,8 @@ class Island:
     Across nodes: ``host`` is this node's name, used for the root's address,
     and ``worker_nodes`` lists the Slurm nodes workers go to, in turn; a
     worker on another node is started through ``srun`` inside the current
-    allocation. ``workdir`` must then be on a shared file system.
+    allocation, with one ``langx.signal_agent`` per node so that ``signal``
+    and ``kill`` reach it. ``workdir`` must then be on a shared file system.
     """
 
     def __init__(self, workdir, n_workers=2, poll_timeout_ms=500, threads=4,
@@ -72,6 +73,8 @@ class Island:
         self.agas = f"{host}:{self.root_port}"
         self.procs = {}
         self.ready = {}
+        self.agents = {}
+        self.agent_procs = {}
 
     def _popen(self, name, cmd, env=None):
         log = open(self.dir / f"{name}.log", "w")
@@ -107,6 +110,8 @@ class Island:
         if node is None and self.worker_nodes:
             node = self.worker_nodes[len(self.nodes) % len(self.worker_nodes)]
         self.nodes[name] = node
+        if node:
+            self._agent(node)
         env = dict(os.environ, **self.extra_env)
         env["PYTHONPATH"] = os.pathsep.join(
             [str(REPO / "python" / "src"), *self.pythonpath,
@@ -135,14 +140,48 @@ class Island:
         """Worker name -> ready info (locality, epoch, pid)."""
         return {k: v for k, v in self.ready.items() if k != "root"}
 
+    def _agent(self, node):
+        """Start the signal helper on ``node`` once; remember its port."""
+        if node in self.agents:
+            return
+        ready = self.dir / f"agent-{node}.ready"
+        log = open(self.dir / f"agent-{node}.log", "w")
+        env = dict(os.environ)
+        env["PYTHONPATH"] = os.pathsep.join([str(REPO / "python" / "src"),
+                                             env.get("PYTHONPATH", "")])
+        self.agent_procs[node] = subprocess.Popen(
+            ["srun", "--nodes=1", "--ntasks=1", f"--nodelist={node}", "--overlap",
+             "--export=ALL", sys.executable, "-m", "langx.signal_agent",
+             "--ready-file", str(ready)],
+            stdout=log, stderr=subprocess.STDOUT, env=env, start_new_session=True)
+        info = wait_json(ready, 60)
+        if info is None:
+            raise RuntimeError(f"signal helper on {node} did not start")
+        self.agents[node] = info["port"]
+
+    def signal(self, name, sig):
+        """Send ``sig`` to worker ``name``, on whichever node it runs.
+
+        Returns ``(t, uncertainty_s)``: the CLOCK_MONOTONIC time on this node
+        at which the signal was sent, and how far off that can be. For a
+        worker on another node ``t`` is the midpoint of the request to its
+        node's helper, off by at most half the request's round trip.
+        """
+        node = self.nodes.get(name)
+        if not node:
+            t = time.monotonic()
+            os.kill(self.procs[name].pid, sig)
+            return t, 0.0
+        from langx.signal_agent import request  # noqa: PLC0415
+        t0 = time.monotonic()
+        request(node, self.agents[node], sig.name, self.ready[name]["pid"])
+        t1 = time.monotonic()
+        return (t0 + t1) / 2, (t1 - t0) / 2
+
     def kill(self, name):
-        """SIGKILL one process."""
-        if self.nodes.get(name):
-            raise NotImplementedError(f"{name} runs on {self.nodes[name]}; "
-                                      "killing a worker on another node is "
-                                      "not supported yet")
-        os.kill(self.procs[name].pid, signal.SIGKILL)
-        self.procs[name].wait(5)
+        """SIGKILL one process, on whichever node it runs."""
+        self.signal(name, signal.SIGKILL)
+        self.procs[name].wait(10)
 
     def stop_workers(self, timeout_s=20):
         """Ask live workers to leave; return their exit reports."""
@@ -162,6 +201,7 @@ class Island:
         # only end srun and leave the worker running there.
         remote = [p for n, p in self.procs.items()
                   if self.nodes.get(n) and p.poll() is None]
+        remote += [p for p in self.agent_procs.values() if p.poll() is None]
         for p in remote:
             p.terminate()
         for p in remote:
@@ -169,7 +209,7 @@ class Island:
                 p.wait(5)
             except subprocess.TimeoutExpired:
                 pass
-        for p in self.procs.values():
+        for p in [*self.procs.values(), *self.agent_procs.values()]:
             if p.poll() is None:
                 try:
                     os.killpg(p.pid, signal.SIGKILL)
