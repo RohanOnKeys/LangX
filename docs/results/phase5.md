@@ -76,6 +76,7 @@ Code: [`python/src/langx/island.py`](../../python/src/langx/island.py) and
 | 224575 | 5 | failure smoke run, 2 trials each, after the fix |
 | 224576 | 5 | failure matrix, 30 trials each; one F7 trial lost to a port clash (below) |
 | 224611 | 5 | F7 again after the fix, 30 trials |
+| 224614 to 224616 | 1 to 3 | re-run from a fresh clone of `main` at `5152903` (below) |
 
 F3 is left out across nodes: its Tier B sink is one SQLite file written by several workers, which
 would sit on the shared file system, where SQLite locking is not reliable. F3 is covered on one
@@ -176,9 +177,20 @@ was fenced in any trial; the F6 replacement committed 21 tasks per trial; F1's c
 | 224572 | every process started on another node took about 30 s to be seen: its ready file appeared on the coordinator's node only after the shared file system's cache expired, and a stop file reached the other node as late | helpers report their port over TCP, ready and exit files on another node are read by that node's helper, remote workers are stopped with SIGTERM |
 | 224576 | one F7 trial crashed: a fresh worker's port, picked as free on the coordinator's node, was in use on its own node (`bind: Address already in use`) | the helper on the worker's node picks the port; F7 re-run as job 224611, 30/30 |
 
+## Re-run from a fresh checkout (jobs 224614 to 224616)
+
+A fresh clone of `main` at `5152903`, built and tested by `bench/rostam_test.sbatch`, then a subset
+of the measurements with the commands in [`docs/reproduce.md`](../reproduce.md).
+
+| Check | Fresh clone | Above |
+|---|---|---|
+| Unit and integration tests | pass, 9/9 integration | pass |
+| Coordinator Python layer (echo) across two nodes, 1 rep | 123.7 µs | 122.7 µs |
+| F2 across three nodes, 5 trials | G1 to G5 5/5, detection 1493.5 ms [1489.8, 1494.2] | 30/30, 1493.6 ms |
+| F7 across three nodes, 5 trials | G1 to G5 5/5, recovery 9665.7 ms [9596.1, 9848.2] | 30/30, 9828.3 ms |
+
 ## Not established
 
-* a re-run from a fresh checkout (plan phase 5 exit), not done yet;
 * cross-node results for F3, left out for the SQLite reason above;
 * why F7 re-runs committed tasks across nodes and not on one;
 * scaling past 4 workers, CPU-bound nodes, and workers that run several nodes at once;
@@ -204,4 +216,4 @@ Not claimed:
 
 ## Next step
 
-Re-run a subset from a fresh checkout, then phase 6: the short report and the upstream HPX issues.
+Phase 6: the short report and the upstream HPX issues.
