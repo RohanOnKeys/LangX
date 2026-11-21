@@ -39,7 +39,10 @@ Can a LangGraph agent whose nodes run on HPX localities survive worker kill, wor
 | `f0.sbatch` | runs `run_f0.py` on one Rostam node |
 | `run_exp01.py` | F1 to F9: one process per trial, fresh island, one injected fault, JSON lines output |
 | `analyze_exp01.py` | gates G1 to G5 and metrics from the trial records; writes `aggregate.json` |
-| `exp01.sbatch` | runs every scenario on one Rostam node, then the analysis |
+| `exp01.sbatch` | runs every scenario on one Rostam node, or across several with `--nodes`, then the analysis |
+| `scaling.sbatch`, `analyze_scaling.py` | throughput with 1, 2 and 4 workers across nodes, no failures |
+| `collect_phase5.py` | curated phase 5 numbers (`results/phase5.json`) and figures (`docs/results/figures/`) |
+| `results/` | curated numbers behind the write-ups, tracked |
 | `_runs/` | raw run output, ignored by git |
 
 ## Running F0

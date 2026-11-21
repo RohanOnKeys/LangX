@@ -19,7 +19,7 @@ Codes used in this document (full list: [plan, codes](docs/plan.md#codes)):
 
 Research prototype: LangGraph agent steps executed on HPX localities, with HPX supervision fencing and a coordinator-side commit fence, so that a worker failure neither loses nor double-commits a step.
 
-**Status:** phases 0 to 4 are done; phase 5 (measurement across nodes) is next. The full experiment plan is in [`docs/plan.md`](docs/plan.md).
+**Status:** phases 0 to 4 are done; phase 5 (measurement across nodes) has its results, with a re-run from a fresh checkout still open. The full experiment plan is in [`docs/plan.md`](docs/plan.md).
 
 ## Results
 
@@ -30,6 +30,7 @@ Research prototype: LangGraph agent steps executed on HPX localities, with HPX s
 | 2: coordinator loss | [`docs/results/phase2.md`](docs/results/phase2.md) |
 | 3: coordinator, commit fence, effects; F0 | [`docs/results/phase3.md`](docs/results/phase3.md) |
 | 4: failure harness, F1 to F9 | [`docs/results/phase4.md`](docs/results/phase4.md) |
+| 5: measurement across nodes | [`docs/results/phase5.md`](docs/results/phase5.md) |
 | dispatch overhead split: HPX vs Python | [`docs/results/overhead.md`](docs/results/overhead.md) |
 
 Upstream reports from these results: [hpx#7825](https://github.com/TheHPXProject/hpx/issues/7825) and the tracking issue [hpx#7834](https://github.com/TheHPXProject/hpx/issues/7834).

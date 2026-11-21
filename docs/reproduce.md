@@ -42,6 +42,11 @@ Versions on Rostam when the results were taken: HPX `cc2be553`, gcc 15.1.0, Pyth
 | [`phase3.md`](results/phase3.md) | F0: HPX run equals the LangGraph baseline | `F0_ARGS="--reps 5" sbatch experiments/01_durable_langgraph/f0.sbatch` | 218812 |
 | [`phase3.md`](results/phase3.md) | unit and integration tests, F0 test included | `sbatch bench/rostam_test.sbatch` | 219462 |
 | [`phase4.md`](results/phase4.md) | failure matrix F1 to F9, 30 trials each, and the gates | `TRIALS=30 sbatch --time=04:00:00 experiments/01_durable_langgraph/exp01.sbatch` | 223238 |
+| [`phase5.md`](results/phase5.md) | dispatch overhead, same node and across two | `sbatch bench/overhead_nodes.sbatch` | 224570 |
+| [`phase5.md`](results/phase5.md) | throughput with 1, 2, 4 workers | `sbatch experiments/01_durable_langgraph/scaling.sbatch` | 224571 |
+| [`phase5.md`](results/phase5.md) | poll timeout 250 and 1000 ms | `TRIALS=30 SCENARIOS="F2 F8" EXP_ARGS="--poll-ms 250" sbatch experiments/01_durable_langgraph/exp01.sbatch`, then `--poll-ms 1000` | 224573, 224574 |
+| [`phase5.md`](results/phase5.md) | failure matrix across five nodes | `TRIALS=30 sbatch --nodes=5 --time=03:00:00 experiments/01_durable_langgraph/exp01.sbatch` | 224576, 224611 (F7) |
+| [`phase5.md`](results/phase5.md) | curated numbers and figures | `pip install -r requirements-plot.txt`, then `python experiments/01_durable_langgraph/collect_phase5.py` with the job numbers (see its docstring) | |
 | [`overhead.md`](results/overhead.md) | dispatch overhead, Python layers | `sbatch bench/overhead.sbatch` | 219491 |
 | [`overhead.md`](results/overhead.md) | dispatch overhead, HPX-only floor | `CASES=rtt REPS=3 sbatch bench/hpx_repro/repro.sbatch` | 219492 |
 

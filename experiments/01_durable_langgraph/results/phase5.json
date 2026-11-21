@@ -1,0 +1,775 @@
+{
+ "jobs": {
+  "nodes": "224576",
+  "nodes_rerun": [
+   "224611"
+  ],
+  "one_node": "223238",
+  "overhead": "224570",
+  "poll1000": "224574",
+  "poll250": "224573",
+  "scaling": "224571"
+ },
+ "nodes": {
+  "F1": {
+   "detection_ms": {
+    "max": 1683.4,
+    "median": 992.0,
+    "min": 989.7,
+    "n": 30,
+    "p95": 993.9
+   },
+   "exit_paths": {
+    "coordinator:stop_hang_30s": 30,
+    "root:clean": 30,
+    "worker:clean": 30,
+    "worker:killed_by_harness": 30
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 2085.1,
+    "median": 2004.2,
+    "min": 2003.7,
+    "n": 30,
+    "p95": 2004.9
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F2": {
+   "detection_ms": {
+    "max": 1495.5,
+    "median": 1493.6,
+    "min": 1491.5,
+    "n": 30,
+    "p95": 1495.4
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 29,
+    "worker:killed_by_harness": 30,
+    "worker:no_exit_report": 1
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 3096.7,
+    "median": 1900.5,
+    "min": 1894.1,
+    "n": 30,
+    "p95": 1904.8
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F4": {
+   "detection_ms": {
+    "max": 1496.7,
+    "median": 1493.5,
+    "min": 1490.4,
+    "n": 30,
+    "p95": 1496.4
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 120,
+   "recovery_ms": {
+    "max": 3097.9,
+    "median": 1898.3,
+    "min": 1894.0,
+    "n": 30,
+    "p95": 3097.6
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F5": {
+   "detection_ms": {
+    "max": 1486.1,
+    "median": 1477.9,
+    "min": 1472.5,
+    "n": 60,
+    "p95": 1484.7
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60,
+    "worker:killed_by_harness": 60
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 2681.5,
+    "median": 2283.7,
+    "min": 2276.4,
+    "n": 30,
+    "p95": 2297.1
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F6": {
+   "detection_ms": {
+    "max": 1591.5,
+    "median": 1590.3,
+    "min": 1587.2,
+    "n": 30,
+    "p95": 1591.5
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60,
+    "worker:killed_by_harness": 30
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 2391.0,
+    "median": 1796.6,
+    "min": 1790.3,
+    "n": 30,
+    "p95": 2389.9
+   },
+   "replacement_commits": {
+    "max": 21,
+    "median": 21,
+    "min": 21,
+    "n": 30,
+    "p95": 21
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F7-sync": {
+   "detection_ms": null,
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "coordinator:killed_by_harness": 30,
+    "root:clean": 30,
+    "worker:clean": 60,
+    "worker:killed_by_harness": 60
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 11008.7,
+    "median": 9828.3,
+    "min": 9735.1,
+    "n": 30,
+    "p95": 10451.5
+   },
+   "rerun_after_commit": {
+    "max": 2,
+    "median": 0,
+    "min": 0,
+    "n": 30,
+    "p95": 1
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F8": {
+   "detection_ms": null,
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60
+   },
+   "false_positive_rate": 0.0,
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 1502.9,
+    "median": 301.7,
+    "min": 300.4,
+    "n": 30,
+    "p95": 305.5
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F9": {
+   "detection_ms": null,
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 30,
+   "recovery_ms": {
+    "max": 2004.8,
+    "median": 2004.2,
+    "min": 2003.3,
+    "n": 30,
+    "p95": 2004.7
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  }
+ },
+ "nodes_replaced": {
+  "F7-sync": {
+   "first_run": {
+    "G1": "29/30",
+    "G2": "29/30",
+    "G3": "29/30",
+    "G4a": "29/30",
+    "G5": "30/30"
+   },
+   "job": "224611"
+  }
+ },
+ "one_node": {
+  "F1": {
+   "detection_ms": {
+    "max": 994.8,
+    "median": 993.5,
+    "min": 991.6,
+    "n": 30,
+    "p95": 994.5
+   },
+   "exit_paths": {
+    "coordinator:stop_hang_30s": 30,
+    "root:clean": 30,
+    "worker:clean": 30,
+    "worker:killed_by_harness": 30
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 3204.8,
+    "median": 2003.5,
+    "min": 2003.0,
+    "n": 30,
+    "p95": 3204.7
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F2": {
+   "detection_ms": {
+    "max": 1497.7,
+    "median": 1495.9,
+    "min": 1486.6,
+    "n": 30,
+    "p95": 1497.4
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 30,
+    "worker:killed_by_harness": 30
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 3106.0,
+    "median": 1901.6,
+    "min": 1896.2,
+    "n": 30,
+    "p95": 3102.9
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F3-keyed": {
+   "detection_ms": {
+    "max": 1091.2,
+    "median": 1089.2,
+    "min": 1084.0,
+    "n": 30,
+    "p95": 1090.9
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 30,
+    "worker:killed_by_harness": 30
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 5839.1,
+    "median": 3427.3,
+    "min": 3422.8,
+    "n": 30,
+    "p95": 5838.6
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F3-naive": {
+   "detection_ms": {
+    "max": 1091.4,
+    "median": 1090.0,
+    "min": 1085.3,
+    "n": 30,
+    "p95": 1091.3
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 30,
+    "worker:killed_by_harness": 30
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 5839.1,
+    "median": 3424.3,
+    "min": 3421.4,
+    "n": 30,
+    "p95": 5837.3
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F4": {
+   "detection_ms": {
+    "max": 1496.9,
+    "median": 1495.2,
+    "min": 1493.1,
+    "n": 30,
+    "p95": 1496.6
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 120,
+   "recovery_ms": {
+    "max": 3099.8,
+    "median": 1903.7,
+    "min": 1896.8,
+    "n": 30,
+    "p95": 3099.4
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F5": {
+   "detection_ms": {
+    "max": 1489.5,
+    "median": 1483.8,
+    "min": 1477.1,
+    "n": 60,
+    "p95": 1489.0
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60,
+    "worker:killed_by_harness": 60
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 2692.3,
+    "median": 2291.4,
+    "min": 2282.8,
+    "n": 30,
+    "p95": 2689.6
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F6": {
+   "detection_ms": {
+    "max": 1593.6,
+    "median": 1591.9,
+    "min": 1590.5,
+    "n": 30,
+    "p95": 1593.0
+   },
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60,
+    "worker:killed_by_harness": 30
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 3194.6,
+    "median": 1798.4,
+    "min": 1793.0,
+    "n": 30,
+    "p95": 2597.3
+   },
+   "replacement_commits": {
+    "max": 21,
+    "median": 21,
+    "min": 21,
+    "n": 30,
+    "p95": 21
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F7-sync": {
+   "detection_ms": null,
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "coordinator:killed_by_harness": 30,
+    "root:clean": 30,
+    "worker:clean": 58,
+    "worker:killed_by_harness": 60,
+    "worker:no_exit_report": 2
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 9491.7,
+    "median": 9390.6,
+    "min": 9327.2,
+    "n": 30,
+    "p95": 9488.1
+   },
+   "rerun_after_commit": {
+    "max": 0,
+    "median": 0,
+    "min": 0,
+    "n": 30,
+    "p95": 0
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F8": {
+   "detection_ms": null,
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60
+   },
+   "false_positive_rate": 0.0,
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 0,
+   "recovery_ms": {
+    "max": 302.4,
+    "median": 301.8,
+    "min": 301.1,
+    "n": 30,
+    "p95": 302.3
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  },
+  "F9": {
+   "detection_ms": null,
+   "exit_paths": {
+    "coordinator:clean": 30,
+    "root:clean": 30,
+    "worker:clean": 60
+   },
+   "gates": {
+    "G1": "30/30",
+    "G2": "30/30",
+    "G3": "30/30",
+    "G4a": "30/30",
+    "G5": "30/30"
+   },
+   "late_replies": 30,
+   "recovery_ms": {
+    "max": 2003.9,
+    "median": 2003.4,
+    "min": 2003.1,
+    "n": 30,
+    "p95": 2003.8
+   },
+   "trials": 30,
+   "trials_with_unsignaled_fence": 0
+  }
+ },
+ "overhead": {
+  "one": {
+   "dispatch_work": 83.3,
+   "echo": 112.5,
+   "execute": 250.2,
+   "node": 204.1,
+   "node_nowatch": 187.2,
+   "plain_async": 74.9
+  },
+  "two": {
+   "dispatch_work": 95.0,
+   "echo": 122.7,
+   "execute": 254.9,
+   "node": 210.9,
+   "node_nowatch": 204.1,
+   "plain_async": 85.3
+  }
+ },
+ "poll": {
+  "1000": {
+   "F2_detection_ms": {
+    "max": 2998.9,
+    "median": 2996.8,
+    "min": 2993.0,
+    "n": 30,
+    "p95": 2998.8
+   },
+   "F2_recovery_ms": {
+    "max": 4602.1,
+    "median": 3403.8,
+    "min": 3395.9,
+    "n": 30,
+    "p95": 4601.0
+   },
+   "F8_false_positive_rate": 0.0,
+   "gates_failed": {}
+  },
+  "250": {
+   "F2_detection_ms": {
+    "max": 747.4,
+    "median": 746.1,
+    "min": 744.7,
+    "n": 30,
+    "p95": 747.4
+   },
+   "F2_recovery_ms": {
+    "max": 3003.6,
+    "median": 1802.6,
+    "min": 1801.9,
+    "n": 30,
+    "p95": 3003.1
+   },
+   "F8_false_positive_rate": 0.0,
+   "gates_failed": {}
+  },
+  "500": {
+   "F2_detection_ms": {
+    "max": 1497.7,
+    "median": 1495.9,
+    "min": 1486.6,
+    "n": 30,
+    "p95": 1497.4
+   },
+   "F2_recovery_ms": {
+    "max": 3106.0,
+    "median": 1901.6,
+    "min": 1896.2,
+    "n": 30,
+    "p95": 3102.9
+   },
+   "F8_false_positive_rate": 0.0,
+   "gates_failed": {}
+  }
+ },
+ "scaling": {
+  "nodes-w1": {
+   "baseline": {
+    "max": 276.26,
+    "median": 274.13,
+    "min": 249.12,
+    "n": 30
+   },
+   "efficiency": 1.0,
+   "runs_equal": "30/30",
+   "throughput": {
+    "max": 11.04,
+    "median": 11.03,
+    "min": 10.92,
+    "n": 30
+   },
+   "workers": 1
+  },
+  "nodes-w2": {
+   "baseline": {
+    "max": 276.26,
+    "median": 273.08,
+    "min": 250.0,
+    "n": 30
+   },
+   "efficiency": 0.996,
+   "runs_equal": "30/30",
+   "throughput": {
+    "max": 21.98,
+    "median": 21.97,
+    "min": 21.52,
+    "n": 30
+   },
+   "workers": 2
+  },
+  "nodes-w4": {
+   "baseline": {
+    "max": 273.08,
+    "median": 270.99,
+    "min": 247.39,
+    "n": 30
+   },
+   "efficiency": 0.986,
+   "runs_equal": "30/30",
+   "throughput": {
+    "max": 43.56,
+    "median": 43.5,
+    "min": 41.99,
+    "n": 30
+   },
+   "workers": 4
+  },
+  "one-w1": {
+   "baseline": {
+    "max": 276.26,
+    "median": 262.96,
+    "min": 222.57,
+    "n": 30
+   },
+   "efficiency": 1.0,
+   "runs_equal": "30/30",
+   "throughput": {
+    "max": 11.04,
+    "median": 11.04,
+    "min": 10.94,
+    "n": 30
+   },
+   "workers": 1
+  },
+  "one-w2": {
+   "baseline": {
+    "max": 273.08,
+    "median": 270.99,
+    "min": 247.39,
+    "n": 30
+   },
+   "efficiency": 0.995,
+   "runs_equal": "30/30",
+   "throughput": {
+    "max": 21.98,
+    "median": 21.97,
+    "min": 21.53,
+    "n": 30
+   },
+   "workers": 2
+  },
+  "one-w4": {
+   "baseline": {
+    "max": 277.34,
+    "median": 274.13,
+    "min": 250.88,
+    "n": 30
+   },
+   "efficiency": 0.987,
+   "runs_equal": "30/30",
+   "throughput": {
+    "max": 43.61,
+    "median": 43.59,
+    "min": 41.74,
+    "n": 30
+   },
+   "workers": 4
+  }
+ }
+}
