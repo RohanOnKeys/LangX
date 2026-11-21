@@ -14,6 +14,8 @@ reply line:
   times the request, so no clock on this node is needed.
 * ``READ PATH``: reply ``ok <JSON string of the file's text>``, or
   ``missing``. The file is read on this node, where its writer runs.
+* ``PORT -``: reply ``ok <port>``, a TCP port that is free on this node. A
+  port found free on another node can be taken here.
 
 Errors reply ``error <text>``. Run with
 ``python -m langx.signal_agent --report HOST:PORT``.
@@ -30,6 +32,10 @@ def handle(line):
     """The reply to one request line."""
     try:
         verb, arg = line.split(maxsplit=1)
+        if verb == "PORT":
+            with socket.socket() as s:
+                s.bind(("", 0))
+                return f"ok {s.getsockname()[1]}"
         if verb == "READ":
             try:
                 with open(arg) as f:
@@ -73,6 +79,14 @@ def read(host, port, path, timeout_s=5.0):
     if not reply.startswith("ok "):
         raise OSError(f"read {path} on {host}: {reply}")
     return json.loads(reply[3:])
+
+
+def free_port(host, port, timeout_s=5.0):
+    """A TCP port that is free on the helper's node."""
+    reply = call(host, port, "PORT -", timeout_s)
+    if not reply.startswith("ok "):
+        raise OSError(f"free port on {host}: {reply}")
+    return int(reply[3:])
 
 
 def main(argv=None):

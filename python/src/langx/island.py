@@ -116,13 +116,18 @@ class Island:
         env["PYTHONPATH"] = os.pathsep.join(
             [str(REPO / "python" / "src"), *self.pythonpath,
              env.get("PYTHONPATH", "")])
-        # A free port on this host is only a guess for another node; the
-        # nodes of an exclusive allocation run nothing else.
         prefix = (["srun", "--nodes=1", "--ntasks=1", f"--nodelist={node}",
                    "--overlap", "--export=ALL"] if node else [])
+        if node:
+            # A port found free here can be taken on the other node; its
+            # helper picks one there.
+            from langx.signal_agent import free_port as remote_port  # noqa: PLC0415
+            port = remote_port(node, self.agents[node])
+        else:
+            port = free_port()
         self._popen(name, [
             *prefix, sys.executable, "-m", "langx.worker", "--agas", self.agas,
-            "--hpx", f"{node or self.host}:{free_port()}",
+            "--hpx", f"{node or self.host}:{port}",
             "--threads", str(self.threads),
             "--poll-timeout-ms", str(self.poll_ms),
             "--discovery-timeout-ms", str(self.worker_discovery_ms),

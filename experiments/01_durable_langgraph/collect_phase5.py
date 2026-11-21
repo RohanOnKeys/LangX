@@ -7,7 +7,11 @@ the raw outputs are; copy the two outputs back to commit them.
 
     python experiments/01_durable_langgraph/collect_phase5.py \\
         --overhead 224570 --scaling 224571 --poll250 224573 --poll1000 224574 \\
-        --one-node 223238 --nodes 224576
+        --one-node 223238 --nodes 224576 [--nodes-rerun JOB ...]
+
+``--nodes-rerun`` names jobs that re-ran some scenarios across nodes; their
+results replace those of ``--nodes`` for the same scenarios, and both job
+numbers stay in the JSON.
 
 Figures need matplotlib (``requirements-plot.txt``); without it only the
 JSON is written.
@@ -176,13 +180,21 @@ def main():
     ap = argparse.ArgumentParser()
     for flag in ("overhead", "scaling", "poll250", "poll1000", "one-node", "nodes"):
         ap.add_argument(f"--{flag}", required=True)
+    ap.add_argument("--nodes-rerun", nargs="*", default=[])
     a = ap.parse_args()
+    nodes = failures(a.nodes)
+    replaced = {}
+    for job in a.nodes_rerun:
+        for tag, x in failures(job).items():
+            replaced[tag] = {"job": job, "first_run": nodes.get(tag, {}).get("gates")}
+            nodes[tag] = x
     res = {"jobs": vars(a),
            "overhead": overhead(a.overhead),
            "scaling": scaling(a.scaling),
            "poll": poll({"250": a.poll250, "500": a.one_node, "1000": a.poll1000}),
            "one_node": failures(a.one_node),
-           "nodes": failures(a.nodes)}
+           "nodes": nodes,
+           "nodes_replaced": replaced}
     out = HERE / "results" / "phase5.json"
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(res, indent=1, sort_keys=True))

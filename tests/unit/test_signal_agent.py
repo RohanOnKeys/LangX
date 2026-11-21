@@ -11,7 +11,7 @@ import pytest
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[2] / "python" / "src"))
 
-from langx.signal_agent import read, request, serve  # noqa: E402
+from langx.signal_agent import free_port, read, request, serve  # noqa: E402
 
 pytestmark = pytest.mark.skipif(sys.platform == "win32", reason="POSIX signals")
 
@@ -47,6 +47,12 @@ def test_read_returns_the_text_or_none(agent, tmp_path):
     assert read(*agent, str(f)) is None
     f.write_text('{"locality": 2}\nsecond line')
     assert read(*agent, str(f)) == '{"locality": 2}\nsecond line'
+
+
+def test_free_port_is_bindable_on_the_helpers_node(agent):
+    port = free_port(*agent)
+    with socket.socket() as s:
+        s.bind(("", port))
 
 
 def test_errors_are_reported(agent):
