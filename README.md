@@ -19,7 +19,7 @@ Codes used in this document (full list: [plan, codes](docs/plan.md#codes)):
 
 Research prototype: LangGraph agent steps executed on HPX localities, with HPX supervision fencing and a coordinator-side commit fence, so that a worker failure neither loses nor double-commits a step.
 
-**Status:** phases 0 to 4 are done; phase 5 (measurement across nodes) has its results, with a re-run from a fresh checkout still open. The full experiment plan is in [`docs/plan.md`](docs/plan.md).
+**Status:** phases 0 to 5 are done; phase 6 (the short report) is next. The full experiment plan is in [`docs/plan.md`](docs/plan.md).
 
 ## Results
 

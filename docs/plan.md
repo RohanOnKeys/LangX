@@ -67,7 +67,7 @@ Source tags: **[p0]** to **[p5]** mark a statement measured in that phase; **[VE
 
 Working title: durable LangGraph on HPX supervision dispatch.
 
-Status: phases 0 to 4 are done (results in [`docs/results/`](results/)). Phase 5 measurements are done; its re-run from a fresh checkout is open. This plan is the single source of truth for scope; findings from each phase are folded back into it.
+Status: phases 0 to 5 are done (results in [`docs/results/`](results/)). Phase 6 is next. This plan is the single source of truth for scope; findings from each phase are folded back into it.
 
 ---
 
@@ -613,13 +613,13 @@ Exit: G1 to G5 pass on one node.
 
 Done: G1 to G5 pass in 30/30 trials of every scenario, F1 to F9, 300 trials on one node. Results: [`phase4.md`](results/phase4.md).
 
-### Phase 5: Rostam measurement
+### Phase 5: Rostam measurement (done)
 
 Slurm scripts, baselines, sweeps across nodes, plots.
 
 Exit: results and plots from documented commands, and a subset re-run from a fresh checkout.
 
-Measurements done: overhead across two nodes, scaling to 4 workers (H5 and H6 hold), poll timeout sweep, failure matrix across five nodes. The fresh-checkout re-run is open. Results: [`phase5.md`](results/phase5.md).
+Done: overhead across two nodes, scaling to 4 workers (H5 and H6 hold), poll timeout sweep, failure matrix across five nodes, and a subset re-run from a fresh clone that matched. Results: [`phase5.md`](results/phase5.md).
 
 ### Phase 6: write-up
 
