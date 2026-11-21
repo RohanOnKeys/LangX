@@ -599,7 +599,7 @@ Python `dispatch_work`, SIGKILL and SIGSTOP behavior, connector-side membership 
 
 ### Phase 2: worker lifecycle and coordinator loss (done)
 
-Coordinator loss, by SIGKILL or clean exit, fences every worker; a fenced worker cannot re-init; F7 restarts the workers, which recovered in 6/6 runs. C++ reproducers for the observer and related behaviors filed as [hpx#7834](https://github.com/TheHPXProject/hpx/issues/7834). LangGraph pinned to 1.2.16. Results: [`phase2.md`](results/phase2.md).
+Coordinator loss, by SIGKILL or clean exit, fences every worker; a fenced worker cannot re-init; F7 restarts the workers, which recovered in 15/15 runs. C++ reproducers for the observer and related behaviors filed as [hpx#7834](https://github.com/TheHPXProject/hpx/issues/7834). LangGraph pinned to 1.2.16. Results: [`phase2.md`](results/phase2.md).
 
 ### Phase 3: coordinator, fence and effects (done)
 

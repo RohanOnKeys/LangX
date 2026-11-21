@@ -23,6 +23,8 @@ Research prototype: LangGraph agent steps executed on HPX localities, with HPX s
 
 ## Results
 
+The short report over all phases: [`docs/report.md`](docs/report.md).
+
 | Phase | Write-up |
 | --- | --- |
 | 0: spikes on HPX supervision | [`docs/results/phase0.md`](docs/results/phase0.md) |
