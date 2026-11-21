@@ -55,7 +55,9 @@ states.
 Getting there needed workarounds for gaps in HPX supervision at `cc2be553`. Six were reported
 upstream with C++ reproducers ([hpx#7825](https://github.com/TheHPXProject/hpx/issues/7825),
 [hpx#7834](https://github.com/TheHPXProject/hpx/issues/7834)), and four of those are fixed on HPX
-master, all four by PRs from this work.
+master, all four by PRs from this work. On master two more behaviours found here are gone: a lost
+coordinator no longer fences its workers, and the coordinator's shutdown no longer hangs after a
+dispatch to a dead worker. Two reported gaps remain open.
 
 ## Method
 
@@ -108,14 +110,36 @@ command and Rostam job for each.
 | `snapshot_peers()` keeps a peer after it is fenced and removed | phase 0 | #7834, fixed by [#7922](https://github.com/TheHPXProject/hpx/pull/7922) (this work) and follow-ups | the coordinator's own epoch table |
 | a dispatch in flight to a killed locality never completes or fails | phase 0 | #7834, open | the coordinator abandons it when HPX shows the target fenced |
 | `check_admission` and `dispatch_work` admit any epoch with nothing latched | phase 0 | #7834, open | the commit fence checks the epoch |
-| losing the coordinator, even by a clean exit, fences every worker it joined | phase 2 | same mechanism as the observer finding; likely changed by #7897, not tested | F7 restarts the workers |
-| the coordinator's `hpx::stop()` does not return after it dispatched to an already-dead worker | phases 4, 5 | not reported; candidate fixes on master: [#7865](https://github.com/TheHPXProject/hpx/pull/7865), [#7912](https://github.com/TheHPXProject/hpx/pull/7912), [#8079](https://github.com/TheHPXProject/hpx/pull/8079), [#8112](https://github.com/TheHPXProject/hpx/pull/8112) | the harness bounds the stop at 30 s |
+| losing the coordinator, even by a clean exit, fences every worker it joined | phase 2 | not reported separately; no longer happens on master (below), the same mechanism as the observer finding | F7 restarts the workers |
+| the coordinator's `hpx::stop()` does not return after it dispatched to an already-dead worker | phases 4, 5 | not reported; gone on master (below), which has [#7865](https://github.com/TheHPXProject/hpx/pull/7865), [#7912](https://github.com/TheHPXProject/hpx/pull/7912), [#8079](https://github.com/TheHPXProject/hpx/pull/8079) and [#8112](https://github.com/TheHPXProject/hpx/pull/8112); which of them fixed it is not established | the harness bounds the stop at 30 s |
 
 ### Re-check on current HPX master
 
-Pending: HPX master `161df7fc6` (2026-11-21), built next to the `cc2be553` install, with the langX
-tests, the hpx#7834 reproducers, F1 to F9 (10 trials each) and the phase 2 coordinator-loss spike
-re-run on it (Rostam jobs 224617 to 224621). This section is filled in from those jobs.
+HPX master `161df7fc6a85` (2026-11-21, 1608 commits after `cc2be553`) built with
+`bench/setup/build_hpx.sh` next to the old install, and langX built against it from a separate
+clone, unchanged (Rostam jobs 224617 to 224621).
+
+| Check | `cc2be553` | master `161df7fc6` |
+| --- | --- | --- |
+| langX unit and integration tests | pass | pass, 9/9 integration |
+| Failure matrix F1 to F9, one node | G1 to G5 30/30 each | G1 to G5 10/10 each |
+| A locality leaving right after `finalize()` (hpx#7825) | aborts in `hpx::stop`, 15/15 without a pause | exits cleanly, 10/10, with no pause and with a 1 s pause |
+| A dead observer marks a healthy target failed | yes, every rep | no: the target stays `running` and admitted, 10/10 |
+| `force_disconnect` from a late-connecting locality | `invalid_status` | `rc = 0`, 5/5 |
+| `snapshot_peers()` after the peer is removed | still listed | gone, 5/5 |
+| Workers after the coordinator is killed or leaves cleanly | fenced, 15/15 | not fenced; the new coordinator dispatches to them, 9/9 |
+| Coordinator `hpx::stop()` after F1 | does not return, 30/30 | clean, 10/10 |
+| A dispatch in flight to a killed locality | never completes | never completes: still not ready 30 s after the kill, 5/5 |
+| `check_admission` with epochs 0, 2, 101 (join epoch 1) | admitted | admitted, 5/5 |
+| HPX-only round trip, `hpx::async` / `dispatch_work`, one node | 75 / 83 µs | 75.6 / 83.0 µs (5 reps) |
+| F7 recovery (langX still restarts the workers) | 9.4 s median | 2.96 s median [2.95, 3.10] |
+| Phase 2 restart path, to the first dispatch on fresh workers | 2.3 to 3.0 s | 0.31 s after a clean exit, 0.84 to 1.03 s after a kill |
+
+On master, a coordinator crash no longer forces a worker restart, so langX's F7 could keep the old
+workers and skip step 4 of plan 9.3; that variant was not built or measured here. The faster F7 and
+restart path with the restart still in place are measured, but why they got faster is not
+established. Two #7834 items remain open on master: a dispatch in flight to a killed locality
+never completes, and admission does not check the epoch. langX keeps its workarounds for both.
 
 ## Limits
 
@@ -124,7 +148,8 @@ re-run on it (Rostam jobs 224617 to 224621). This section is filled in from thos
 * **The root is out of scope.** Its loss is not recoverable with current HPX.
 * **Detection uses HPX's testing hook** to set the poll timeout (250 to 1000 ms here); the HPX
   default is 60 s.
-* **F7 needs a worker restart** at `cc2be553`, so its recovery is about 9.4 s on one node.
+* **F7 needs a worker restart** at `cc2be553`, so its recovery is about 9.4 s on one node. On
+  HPX master the restart is no longer needed, but langX does not yet use that.
 * **One coordinator at a time;** split-brain coordinators are not tested.
 * **No scheduler determinism, no accelerators, no real LLM calls;** the model is replayed from
   recorded responses.

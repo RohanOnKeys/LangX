@@ -67,7 +67,7 @@ Source tags: **[p0]** to **[p5]** mark a statement measured in that phase; **[VE
 
 Working title: durable LangGraph on HPX supervision dispatch.
 
-Status: phases 0 to 5 are done (results in [`docs/results/`](results/)). Phase 6 is next. This plan is the single source of truth for scope; findings from each phase are folded back into it.
+Status: phases 0 to 6 are done (results in [`docs/results/`](results/), report in [`report.md`](report.md)). This plan is the single source of truth for scope; findings from each phase are folded back into it.
 
 ---
 
@@ -621,9 +621,11 @@ Exit: results and plots from documented commands, and a subset re-run from a fre
 
 Done: overhead across two nodes, scaling to 4 workers (H5 and H6 hold), poll timeout sweep, failure matrix across five nodes, and a subset re-run from a fresh clone that matched. Results: [`phase5.md`](results/phase5.md).
 
-### Phase 6: write-up
+### Phase 6: write-up (done)
 
 Short report: claim, method, results, limits. Upstream findings filed or updated as HPX issues.
+
+Done: [`report.md`](report.md), with a re-check on HPX master `161df7fc6`: four of the six reported gaps are fixed there, and the coordinator-loss fencing and the F1 shutdown hang are gone; two gaps remain open on hpx#7834.
 
 ---
 
