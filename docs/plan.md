@@ -67,7 +67,7 @@ Source tags: **[p0]** to **[p5]** mark a statement measured in that phase; **[VE
 
 Working title: durable LangGraph on HPX supervision dispatch.
 
-Status: phases 0 to 5 are done (results in [`docs/results/`](results/)). Phase 6 is next. This plan is the single source of truth for scope; findings from each phase are folded back into it.
+Status: phases 0 to 6 are done (results in [`docs/results/`](results/), report in [`report.md`](report.md)). This plan is the single source of truth for scope; findings from each phase are folded back into it.
 
 ---
 
@@ -599,7 +599,7 @@ Python `dispatch_work`, SIGKILL and SIGSTOP behavior, connector-side membership 
 
 ### Phase 2: worker lifecycle and coordinator loss (done)
 
-Coordinator loss, by SIGKILL or clean exit, fences every worker; a fenced worker cannot re-init; F7 restarts the workers, which recovered in 6/6 runs. C++ reproducers for the observer and related behaviors filed as [hpx#7834](https://github.com/TheHPXProject/hpx/issues/7834). LangGraph pinned to 1.2.16. Results: [`phase2.md`](results/phase2.md).
+Coordinator loss, by SIGKILL or clean exit, fences every worker; a fenced worker cannot re-init; F7 restarts the workers, which recovered in 15/15 runs. C++ reproducers for the observer and related behaviors filed as [hpx#7834](https://github.com/TheHPXProject/hpx/issues/7834). LangGraph pinned to 1.2.16. Results: [`phase2.md`](results/phase2.md).
 
 ### Phase 3: coordinator, fence and effects (done)
 
@@ -621,9 +621,11 @@ Exit: results and plots from documented commands, and a subset re-run from a fre
 
 Done: overhead across two nodes, scaling to 4 workers (H5 and H6 hold), poll timeout sweep, failure matrix across five nodes, and a subset re-run from a fresh clone that matched. Results: [`phase5.md`](results/phase5.md).
 
-### Phase 6: write-up
+### Phase 6: write-up (done)
 
 Short report: claim, method, results, limits. Upstream findings filed or updated as HPX issues.
+
+Done: [`report.md`](report.md), with a re-check on HPX master `161df7fc6`: four of the six reported gaps are fixed there, and the coordinator-loss fencing and the F1 shutdown hang are gone; two gaps remain open on hpx#7834.
 
 ---
 

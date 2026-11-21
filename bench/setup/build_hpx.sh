@@ -2,6 +2,10 @@
 # Build and install HPX at the commit every langX result used, with the
 # options supervision needs. Run on a compute node, it takes a while:
 #   srun -p medusa -N1 --exclusive -t 02:00:00 bash bench/setup/build_hpx.sh
+# or as a batch job:
+#   sbatch -p medusa -N1 --exclusive -t 02:00:00 -o hpx_build_%j.out bench/setup/build_hpx.sh
+# Compute nodes may have no internet access: clone or fetch HPX_SRC on the
+# login node first; the build then only fetches if the commit is missing.
 # Optional: HPX_SRC (default /work/$USER/src/hpx), HPX_COMMIT, HPX_INSTALL
 # (default from rostam_env.sh), JOBS.
 #
@@ -13,7 +17,9 @@
 #   grep -E 'HPX_WITH_(SUPERVISION|FORCE_DISCONNECT|NETWORKING|PARCELPORT_TCP|MALLOC)' \
 #     "$HPX_INSTALL"/lib*/cmake/HPX/HPXCacheVariables.cmake
 
-HERE=$(cd "$(dirname "$0")" && pwd)
+# Under sbatch the script runs from a copy; submit from the repository root.
+HERE=${SLURM_SUBMIT_DIR:+$SLURM_SUBMIT_DIR/bench/setup}
+HERE=${HERE:-$(cd "$(dirname "$0")" && pwd)}
 . "$HERE/rostam_env.sh"   # before set -u: Lmod is not -u safe
 set -euo pipefail
 
@@ -24,7 +30,7 @@ BUILD=$HPX_SRC/build-${HPX_COMMIT:0:8}
 if [ ! -d "$HPX_SRC/.git" ]; then
   git clone https://github.com/TheHPXProject/hpx.git "$HPX_SRC"
 fi
-git -C "$HPX_SRC" fetch -q origin
+git -C "$HPX_SRC" cat-file -e "$HPX_COMMIT^{commit}" 2>/dev/null || git -C "$HPX_SRC" fetch -q origin
 git -C "$HPX_SRC" checkout -q "$HPX_COMMIT"
 echo "=== hpx $(git -C "$HPX_SRC" rev-parse HEAD) -> $HPX_INSTALL"
 
