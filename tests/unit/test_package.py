@@ -9,7 +9,8 @@ import sys
 
 PKG = pathlib.Path(__file__).resolve().parents[2] / "python" / "src" / "langx"
 sys.path.insert(0, str(PKG.parent))
-MODULES = ["coordinator", "effects", "island", "runtime", "stub_llm", "worker"]
+MODULES = ["coordinator", "effects", "island", "runtime", "signal_agent", "stub_llm",
+           "worker"]
 
 
 def _load(path):

@@ -62,12 +62,12 @@ Phase 0 spikes, lettered as in the phase 0 write-up:
 
 Phase 2 coordinators: **C1** is the first coordinator, the one that is killed or leaves; **C2** is the one started after it.
 
-Source tags: **[p0]** to **[p4]** mark a statement measured in that phase; **[VERIFY]** marks an assumption still to check. Follow-on work is lettered **A**, **B**, **C** (section 20), not to be confused with phases or spikes.
+Source tags: **[p0]** to **[p5]** mark a statement measured in that phase; **[VERIFY]** marks an assumption still to check. Follow-on work is lettered **A**, **B**, **C** (section 20), not to be confused with phases or spikes.
 
 
 Working title: durable LangGraph on HPX supervision dispatch.
 
-Status: phases 0 to 4 are done (results in [`docs/results/`](results/)). Phase 5 is next. This plan is the single source of truth for scope; findings from each phase are folded back into it.
+Status: phases 0 to 4 are done (results in [`docs/results/`](results/)). Phase 5 measurements are done; its re-run from a fresh checkout is open. This plan is the single source of truth for scope; findings from each phase are folded back into it.
 
 ---
 
@@ -80,9 +80,9 @@ Status: phases 0 to 4 are done (results in [`docs/results/`](results/)). Phase 5
 | RayX README and exp70 (README, gap matrix, evidence index, Slice 3B sources) | Read | exp70 by Bita; reproduction on `cc2be553` by Rohan |
 | RayX exp66 | Partly | In-process hosting model and transport |
 | LangGraph runtime, checkpointer and durable execution docs | Read | Behavior needed here checked in spike D on 1.2.16 |
-| langX phase 0 to phase 4 results | Fully | [`phase0.md`](results/phase0.md), [`phase1.md`](results/phase1.md), [`phase2.md`](results/phase2.md), [`phase3.md`](results/phase3.md), [`phase4.md`](results/phase4.md) |
+| langX phase 0 to phase 5 results | Fully | [`phase0.md`](results/phase0.md), [`phase1.md`](results/phase1.md), [`phase2.md`](results/phase2.md), [`phase3.md`](results/phase3.md), [`phase4.md`](results/phase4.md), [`phase5.md`](results/phase5.md) |
 
-Rule: a statement marked **[VERIFY]** is an assumption that must be checked before code depends on it. Statements marked **[p0]** to **[p4]** were measured in that phase.
+Rule: a statement marked **[VERIFY]** is an assumption that must be checked before code depends on it. Statements marked **[p0]** to **[p5]** were measured in that phase.
 
 ---
 
@@ -204,6 +204,10 @@ langX: worker runtime, coordinator, commit fence, outbox, LangGraph proxies
 | Killed worker in membership | Stays after it is fenced; leaves with the root's `force_disconnect` | [p4] |
 | Coordinator `hpx::stop()` after dispatching to an already-dead worker | Does not return within 30 s, 30/30; after a worker dies mid-node the coordinator stops cleanly | [p4] |
 | Detection under load, poll timeout 500 ms | 0.99 to 1.59 s depending on the scenario, spread of a few ms within one; no healthy worker fenced in 300 trials | [p4] |
+| Detection against the poll timeout | Three poll windows: 746, 1496, 2997 ms at 250, 500, 1000 ms (F2, 30 trials each) | [p5] |
+| Detection and recovery across nodes | Within a few ms of one node for F1, F2, F4 to F6, F8, F9; F7 recovery 0.4 s longer | [p5] |
+| Dispatch across nodes | `dispatch_work` round trip 95.0 µs against 83.3 µs on one node; full langX dispatch 254.9 against 250.2 µs | [p5] |
+| F7 resume across nodes | A task committed by the old coordinator can run again (at most 2 per trial); its outbox key keeps the effect to one application | [p5] |
 
 ### 3.4 Gaps and how this design handles them
 
@@ -614,6 +618,8 @@ Done: G1 to G5 pass in 30/30 trials of every scenario, F1 to F9, 300 trials on o
 Slurm scripts, baselines, sweeps across nodes, plots.
 
 Exit: results and plots from documented commands, and a subset re-run from a fresh checkout.
+
+Measurements done: overhead across two nodes, scaling to 4 workers (H5 and H6 hold), poll timeout sweep, failure matrix across five nodes. The fresh-checkout re-run is open. Results: [`phase5.md`](results/phase5.md).
 
 ### Phase 6: write-up
 

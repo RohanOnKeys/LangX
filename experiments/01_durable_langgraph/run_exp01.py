@@ -35,6 +35,7 @@ import json
 import os
 import pathlib
 import signal
+import socket
 import subprocess
 import sys
 import threading
@@ -110,6 +111,16 @@ def baseline(run_id, p, tdir, mode):
             "tier_b": tier_b(tdir / "baseline_direct.sqlite", mode)}
 
 
+def island(tdir, p, a):
+    """The trial's island; workers on ``--worker-nodes`` if given."""
+    nodes = [n for n in a.worker_nodes.split(",") if n]
+    (tdir / "island").mkdir(exist_ok=True)
+    return Island(tdir / "island", n_workers=p["workers"],
+                  poll_timeout_ms=p["poll_ms"], preload=PRELOAD,
+                  pythonpath=[HERE], worker_nodes=nodes,
+                  host=socket.gethostname() if nodes else "localhost")
+
+
 def write_json(path, obj):
     tmp = pathlib.Path(f"{path}.tmp")
     tmp.write_text(json.dumps(obj, indent=1, sort_keys=True))
@@ -162,10 +173,11 @@ class Injector:
         self.spawn(run())
 
     def send(self, peer, sig):
-        name, info = self.by_loc[peer.locality]
-        self.signals.append({"t": time.monotonic(), "signal": sig.name,
-                             "locality": peer.locality, "worker": name})
-        os.kill(info["pid"], sig)
+        name, _ = self.by_loc[peer.locality]
+        t, err = self.isl.signal(name, sig)
+        self.signals.append({"t": t, "t_err_ms": round(err * 1e3, 3),
+                             "signal": sig.name, "locality": peer.locality,
+                             "worker": name})
         if sig == signal.SIGKILL:
             self.killed.add(name)
         elif sig == signal.SIGSTOP:
@@ -397,14 +409,11 @@ def trial(a):
            "params": p, "tier_b_mode": mode}
     rec["baseline"] = baseline(run_id, p, tdir, mode)
 
-    (tdir / "island").mkdir(exist_ok=True)
-    isl = Island(tdir / "island", n_workers=p["workers"],
-                 poll_timeout_ms=p["poll_ms"], preload=PRELOAD,
-                 pythonpath=[HERE]).start()
+    isl = island(tdir, p, a).start()
     inj = None
     try:
         rt = Runtime()
-        rt.start(isl.agas, f"localhost:{free_port()}")
+        rt.start(isl.agas, f"{isl.host}:{free_port()}")
         rt.init(5.0, p["poll_ms"] / 1000.0)
         joined = rt.wait_for_peers([w["locality"] for w in isl.workers().values()])
         log = EffectLog(tdir / "hpx_effects.sqlite")
@@ -435,7 +444,7 @@ def coordinator_process(a):
     p = params(a)
     tdir = pathlib.Path(a.trial_dir)
     rt = Runtime()
-    rt.start(a.agas, f"localhost:{free_port()}")
+    rt.start(a.agas, f"{a.host or 'localhost'}:{free_port()}")
     me = rt.init(5.0, p["poll_ms"] / 1000.0)
     write_json(tdir / f"{a.name}.ready", {"locality": me.locality,
                                           "epoch": me.epoch, "pid": os.getpid()})
@@ -518,17 +527,14 @@ def trial_f7(a):
     rec = {"scenario": "F7", "seed": a.seed, "run_id": run_id, "params": p,
            "durability": a.durability, "tier_b_mode": None}
     rec["baseline"] = baseline(run_id, p, tdir, None)
-    (tdir / "island").mkdir(exist_ok=True)
-    isl = Island(tdir / "island", n_workers=p["workers"],
-                 poll_timeout_ms=p["poll_ms"], preload=PRELOAD,
-                 pythonpath=[HERE]).start()
+    isl = island(tdir, p, a).start()
     procs = {}
     env = dict(os.environ)
 
     def coordinator(name, localities, resume, disconnect=()):
         cmd = [sys.executable, __file__, "--role", "coordinator", "--name", name,
                "--scenario", "F7", "--seed", str(a.seed), "--trial-dir", str(tdir),
-               "--agas", isl.agas, "--run-id", run_id,
+               "--agas", isl.agas, "--host", isl.host, "--run-id", run_id,
                "--localities", ",".join(map(str, localities)),
                "--disconnect", ",".join(map(str, disconnect)),
                "--durability", a.durability, "--poll-ms", str(p["poll_ms"]),
@@ -644,7 +650,7 @@ def run_trials(a):
         cmd = [sys.executable, __file__, "--role", "trial", "--scenario", a.scenario,
                "--seed", str(i), "--trial-dir", str(tdir), "--tier-b", a.tier_b,
                "--durability", a.durability, "--poll-ms", str(a.poll_ms),
-               "--run-timeout-s", str(a.run_timeout_s)]
+               "--run-timeout-s", str(a.run_timeout_s), "--worker-nodes", a.worker_nodes]
         for k in ("workers", "width", "loops", "latency_ms", "stop_ms", "kill_after"):
             if getattr(a, k) is not None:
                 cmd += [f"--{k.replace('_', '-')}", str(getattr(a, k))]
@@ -700,6 +706,9 @@ def main():
     ap.add_argument("--kill-after", type=int,
                     help="F7: kill the coordinator after this many commits")
     ap.add_argument("--run-timeout-s", type=float, default=120.0)
+    ap.add_argument("--worker-nodes", default="",
+                    help="comma-separated Slurm nodes for the workers, in turn; "
+                         "default: every process on this node")
     # internal
     ap.add_argument("--role", choices=["driver", "trial", "coordinator"],
                     default="driver")
@@ -711,6 +720,7 @@ def main():
     ap.add_argument("--localities", default="")
     ap.add_argument("--disconnect", default="")
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--host", default="")
     a = ap.parse_args()
 
     import make_fixtures  # noqa: PLC0415

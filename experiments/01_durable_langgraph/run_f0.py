@@ -17,6 +17,7 @@ import argparse
 import asyncio
 import json
 import pathlib
+import socket
 import sys
 import time
 
@@ -58,7 +59,12 @@ def main():
     ap.add_argument("--workers", type=int, default=2)
     ap.add_argument("--reps", type=int, default=3)
     ap.add_argument("--poll-ms", type=int, default=500)
+    ap.add_argument("--worker-nodes", default="",
+                    help="comma-separated Slurm nodes for the workers, in turn; "
+                         "default: every worker on this host")
     args = ap.parse_args()
+    nodes = [n for n in args.worker_nodes.split(",") if n]
+    host = socket.gethostname() if nodes else "localhost"
     # The stub LLM only knows the recorded parameter points (make_fixtures).
     import make_fixtures  # noqa: PLC0415
     if args.width not in make_fixtures.WIDTHS or args.loops not in make_fixtures.LOOPS:
@@ -73,13 +79,14 @@ def main():
 
     isl = Island(out / "island", n_workers=args.workers,
                  poll_timeout_ms=args.poll_ms, preload=PRELOAD,
-                 pythonpath=[HERE])
+                 pythonpath=[HERE], host=host, worker_nodes=nodes)
     (out / "island").mkdir(exist_ok=True)
     isl.start()
-    rec = {"args": vars(args), "baseline": base}
+    rec = {"args": vars(args), "baseline": base, "coordinator_host": host,
+           "worker_nodes": dict(isl.nodes)}
     try:
         rt = Runtime()
-        rt.start(isl.agas, f"localhost:{free_port()}")
+        rt.start(isl.agas, f"{host}:{free_port()}")
         rt.init(5.0, args.poll_ms / 1000.0)
         joined = rt.wait_for_peers([w["locality"] for w in isl.workers().values()])
         hpx_log = EffectLog(out / "hpx_effects.sqlite")
@@ -97,6 +104,13 @@ def main():
                 per_worker[e["locality"]] = per_worker.get(e["locality"], 0) + 1
         rec["events"] = kinds
         rec["commits_per_worker"] = per_worker
+        # Throughput: committed tasks per second of run wall time. The
+        # baseline runs the same tasks, so it uses the same count.
+        for b, h in zip(base, rec["hpx"]):
+            h["commits"] = sum(1 for e in coord.events if e["event"] == "committed"
+                               and e["run_id"] == h["run_id"])
+            h["throughput"] = round(h["commits"] / h["wall_s"], 2)
+            b["throughput"] = round(h["commits"] / b["wall_s"], 2)
         rec["effects"] = {
             "baseline_keys": len(base_log.keys("outbox")),
             "hpx_keys": len(hpx_log.keys("outbox")),
@@ -128,6 +142,8 @@ def main():
                       "effects": rec["effects"],
                       "wall_s": {"baseline": [b["wall_s"] for b in base],
                                  "hpx": [h["wall_s"] for h in rec["hpx"]]},
+                      "throughput": {"baseline": [b.get("throughput") for b in base],
+                                     "hpx": [h.get("throughput") for h in rec["hpx"]]},
                       "exit": {k: (v if k != "workers" else
                                    {n: (r or {}).get("exit_path") for n, r in v.items()})
                                for k, v in rec["exit"].items()}}, indent=1))
