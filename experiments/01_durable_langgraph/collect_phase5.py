@@ -125,20 +125,22 @@ def figures(res):
 
     # Throughput against worker count.
     fig, ax = plt.subplots(figsize=(6, 4), **kw)
-    for layout, color, name in (("nodes", ORANGE, "each worker on its own node"),
-                                ("one", BLUE, "all workers on one node")):
-        pts = sorted((v["workers"], v["throughput"]["median"])
-                     for k, v in res["scaling"].items() if k.startswith(layout))
-        ax.plot(*zip(*pts), color=color, linewidth=2, marker="o", markersize=8,
-                markeredgecolor=SURFACE, markeredgewidth=2, label=name)
     one = next(v for k, v in res["scaling"].items() if k == "nodes-w1")
     ax.plot([1, 4], [one["throughput"]["median"], 4 * one["throughput"]["median"]],
-            color=INK2, linewidth=1, linestyle="--")
-    ax.annotate("linear", (4, 4 * one["throughput"]["median"]), color=INK2,
-                xytext=(4, 0), textcoords="offset points", va="center")
+            color=INK2, linewidth=1, linestyle="--", label="linear")
+    # The two layouts coincide: the wider orange marks sit under the blue.
+    for layout, color, name, size, width in (
+            ("nodes", ORANGE, "each worker on its own node", 14, 5),
+            ("one", BLUE, "all workers on one node", 7, 2)):
+        pts = sorted((v["workers"], v["throughput"]["median"])
+                     for k, v in res["scaling"].items() if k.startswith(layout))
+        ax.plot(*zip(*pts), color=color, linewidth=width, marker="o",
+                markersize=size, markeredgecolor=SURFACE, markeredgewidth=1.5,
+                label=name)
     ax.set_xticks([1, 2, 4])
     ax.set_xlabel("workers", color=INK2)
-    style(ax, "Throughput, no failures", "committed tasks per second")
+    style(ax, "Throughput, no failures (the two layouts coincide)",
+          "committed tasks per second")
     ax.legend(frameon=False, labelcolor=INK2, loc="upper left")
     fig.tight_layout()
     fig.savefig(FIGS / "phase5_scaling.png", **kw)
@@ -146,11 +148,11 @@ def figures(res):
     # Detection against the poll timeout.
     fig, ax = plt.subplots(figsize=(6, 4), **kw)
     pts = sorted((int(ms), v["F2_detection_ms"]["median"]) for ms, v in res["poll"].items())
-    ax.plot(*zip(*pts), color=BLUE, linewidth=2, marker="o", markersize=8,
-            markeredgecolor=SURFACE, markeredgewidth=2)
     ax.plot([250, 1000], [750, 3000], color=INK2, linewidth=1, linestyle="--")
-    ax.annotate("3 × poll timeout", (1000, 3000), color=INK2, xytext=(-8, 8),
+    ax.annotate("3 × poll timeout", (625, 1875), color=INK2, xytext=(-10, 10),
                 textcoords="offset points", ha="right")
+    ax.plot(*zip(*pts), color=BLUE, linestyle="none", marker="o", markersize=9,
+            markeredgecolor=SURFACE, markeredgewidth=1.5)
     ax.set_xticks([250, 500, 1000])
     ax.set_xlabel("poll timeout, ms", color=INK2)
     style(ax, "Detection of a killed worker (F2), one node", "median detection, ms")
@@ -171,8 +173,10 @@ def figures(res):
                    width=0.36, color=color, label=name, edgecolor=SURFACE, linewidth=1)
         ax.set_xticks(range(len(tags)), [t.replace("-sync", "") for t in tags])
         style(ax, f"{title}, median of 30 trials", "seconds")
-    axes[0].legend(frameon=False, labelcolor=INK2)
-    fig.tight_layout()
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, frameon=False, labelcolor=INK2, ncol=2,
+               loc="upper center")
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
     fig.savefig(FIGS / "phase5_failures.png", **kw)
 
 
