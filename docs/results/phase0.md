@@ -60,7 +60,7 @@ depends on them.
 | Transport | TCP parcelport on `localhost` |
 | Detection hook | `set_failure_detection_poll_timeout_for_testing` on every locality before `init()` |
 | Clock | `CLOCK_MONOTONIC` on one node for every timestamp |
-| Repository | `RohanOnKeys/langX`, code in [`spikes/phase0/`](../../spikes/phase0/) |
+| Repository | `RohanOnKeys/LangX`, code in [`spikes/phase0/`](../../spikes/phase0/) |
 
 **Native build:** one pybind11 module (`_p0`) loaded by the coordinator and every worker, so
 `run_node` and its `make_fenced_action_t` wrapper are registered by the same shared object in
