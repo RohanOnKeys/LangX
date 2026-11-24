@@ -37,7 +37,7 @@ Code: [`python/src/langx/island.py`](../../python/src/langx/island.py) and
 
 ## Summary
 
-* **H5 holds.** A full langX dispatch takes 254.9 µs with the worker on another node, 4.7 µs more
+* **H5 holds.** A full LangX dispatch takes 254.9 µs with the worker on another node, 4.7 µs more
   than on one node; the HPX part takes 11.7 µs more. The overhead over an in-process call is about
   0.24% of a 100 ms node, against the plan's 10% bound.
 * **H6 holds.** Throughput is 11.0, 22.0 and 43.5 tasks per second with 1, 2 and 4 workers, a
@@ -53,7 +53,7 @@ Code: [`python/src/langx/island.py`](../../python/src/langx/island.py) and
   resumed run executed a task the old coordinator had already committed; the outbox key kept its
   effect at one application. On one node this did not happen in 30 trials.
 * **The baseline is about 25 times faster than one worker.** The in-process baseline runs the 32
-  searches of a loop in parallel threads (270 tasks per second); a langX worker runs one node at
+  searches of a loop in parallel threads (270 tasks per second); a LangX worker runs one node at
   a time, so it tops out near 1 / node latency.
 
 ## Setup
@@ -201,7 +201,7 @@ of the measurements with the commands in [`docs/reproduce.md`](../reproduce.md).
 
 Supported:
 
-> On HPX master `cc2be553`, on Rostam, langX dispatch costs about 255 µs with the worker on another
+> On HPX master `cc2be553`, on Rostam, LangX dispatch costs about 255 µs with the worker on another
 > node, 5 µs more than on one node; throughput grows linearly from 1 to 4 workers for waiting
 > nodes; and with workers on four nodes the failure matrix F1, F2 and F4 to F9 keeps the stock
 > LangGraph final state in 30/30 trials each, with no outbox effect applied twice and no stale

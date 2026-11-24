@@ -76,7 +76,7 @@ GIL. Python nodes run on one dedicated OS thread per worker.
 
 The two failures in job 216761:
 
-* **Refusal reported as abandonment (langX).** With the target already fenced, the fence watch
+* **Refusal reported as abandonment (LangX).** With the target already fenced, the fence watch
   returned before the refusal arrived through the completion pipe. `dispatch_node` now checks
   admission before sending.
 * **Healthy survivor fenced (HPX behaviour).** After `w2` was killed and removed, `w1` refused
@@ -131,7 +131,7 @@ Settled after this write-up:
 
 Supported:
 
-> On HPX master `cc2be553`, on one Rostam node, the langX bindings let a Python coordinator join
+> On HPX master `cc2be553`, on one Rostam node, the LangX bindings let a Python coordinator join
 > Python-hosted workers, dispatch nodes to them under `dispatch_work`, abandon a dispatch whose
 > target is fenced in flight, have the root `force_disconnect` a killed worker, and shut the whole
 > island down cleanly. A worker that joined an older worker and then died left the older worker

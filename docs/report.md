@@ -1,4 +1,4 @@
-# langX report: exactly-once agent steps on HPX
+# LangX report: exactly-once agent steps on HPX
 
 Codes used in this document (full list: [plan, codes](plan.md#codes)):
 
@@ -32,7 +32,7 @@ write-ups:** [`results/`](results/). **Reproducing:** [`reproduce.md`](reproduce
 Agent frameworks such as LangGraph checkpoint state between steps but leave the failure of the
 processes that run those steps to the user. When a worker dies or freezes mid-step, the step is
 re-run, and a side effect it already caused can happen twice. HPX now has native locality
-supervision: failure detection, per-epoch fencing and fenced dispatch. langX asks whether that,
+supervision: failure detection, per-epoch fencing and fenced dispatch. LangX asks whether that,
 plus a small check on the coordinator, is enough to give a real agent framework these properties
 (plan 4.1):
 
@@ -102,7 +102,7 @@ command and Rostam job for each.
 
 ## HPX findings and their status
 
-| Finding (HPX `cc2be553`) | Where | Upstream | langX workaround |
+| Finding (HPX `cc2be553`) | Where | Upstream | LangX workaround |
 | --- | --- | --- | --- |
 | `finalize()` leaves `await_terminal` calls pending; a locality stopping right after it aborts | phase 0 | [#7825](https://github.com/TheHPXProject/hpx/issues/7825), fixed by [#7835](https://github.com/TheHPXProject/hpx/pull/7835) (this work) | pause of two poll timeouts after `finalize()` |
 | a failed delivery to a dead observer fences a healthy target | phase 1 | #7834, fixed by [#7897](https://github.com/TheHPXProject/hpx/pull/7897) (this work) | workers join no peers at start |
@@ -116,12 +116,12 @@ command and Rostam job for each.
 ### Re-check on current HPX master
 
 HPX master `161df7fc6a85` (2026-11-21, 1608 commits after `cc2be553`) built with
-`bench/setup/build_hpx.sh` next to the old install, and langX built against it from a separate
+`bench/setup/build_hpx.sh` next to the old install, and LangX built against it from a separate
 clone, unchanged (Rostam jobs 224617 to 224621).
 
 | Check | `cc2be553` | master `161df7fc6` |
 | --- | --- | --- |
-| langX unit and integration tests | pass | pass, 9/9 integration |
+| LangX unit and integration tests | pass | pass, 9/9 integration |
 | Failure matrix F1 to F9, one node | G1 to G5 30/30 each | G1 to G5 10/10 each |
 | A locality leaving right after `finalize()` (hpx#7825) | aborts in `hpx::stop`, 15/15 without a pause | exits cleanly, 10/10, with no pause and with a 1 s pause |
 | A dead observer marks a healthy target failed | yes, every rep | no: the target stays `running` and admitted, 10/10 |
@@ -132,14 +132,14 @@ clone, unchanged (Rostam jobs 224617 to 224621).
 | A dispatch in flight to a killed locality | never completes | never completes: still not ready 30 s after the kill, 5/5 |
 | `check_admission` with epochs 0, 2, 101 (join epoch 1) | admitted | admitted, 5/5 |
 | HPX-only round trip, `hpx::async` / `dispatch_work`, one node | 75 / 83 µs | 75.6 / 83.0 µs (5 reps) |
-| F7 recovery (langX still restarts the workers) | 9.4 s median | 2.96 s median [2.95, 3.10] |
+| F7 recovery (LangX still restarts the workers) | 9.4 s median | 2.96 s median [2.95, 3.10] |
 | Phase 2 restart path, to the first dispatch on fresh workers | 2.3 to 3.0 s | 0.31 s after a clean exit, 0.84 to 1.03 s after a kill |
 
-On master, a coordinator crash no longer forces a worker restart, so langX's F7 could keep the old
+On master, a coordinator crash no longer forces a worker restart, so LangX's F7 could keep the old
 workers and skip step 4 of plan 9.3; that variant was not built or measured here. The faster F7 and
 restart path with the restart still in place are measured, but why they got faster is not
 established. Two #7834 items remain open on master: a dispatch in flight to a killed locality
-never completes, and admission does not check the epoch. langX keeps its workarounds for both.
+never completes, and admission does not check the epoch. LangX keeps its workarounds for both.
 
 ## Limits
 
@@ -149,11 +149,11 @@ never completes, and admission does not check the epoch. langX keeps its workaro
 * **Detection uses HPX's testing hook** to set the poll timeout (250 to 1000 ms here); the HPX
   default is 60 s.
 * **F7 needs a worker restart** at `cc2be553`, so its recovery is about 9.4 s on one node. On
-  HPX master the restart is no longer needed, but langX does not yet use that.
+  HPX master the restart is no longer needed, but LangX does not yet use that.
 * **One coordinator at a time;** split-brain coordinators are not tested.
 * **No scheduler determinism, no accelerators, no real LLM calls;** the model is replayed from
   recorded responses.
-* **Throughput:** a langX worker runs one node at a time, so the in-process LangGraph baseline,
+* **Throughput:** a LangX worker runs one node at a time, so the in-process LangGraph baseline,
   which runs branches in parallel threads, is about 25 times faster than one worker at 100 ms per
   node.
 * **Scope of the measurements:** Rostam, up to five nodes and four workers, waiting (I/O-bound)
@@ -165,7 +165,7 @@ never completes, and admission does not check the epoch. langX keeps its workaro
 
 | Item | Path |
 | --- | --- |
-| langX package | [`python/src/langx/`](../python/src/langx/) |
+| LangX package | [`python/src/langx/`](../python/src/langx/) |
 | Root and membership action | [`hpx_impl/`](../hpx_impl/) |
 | Experiment, harness, analysis | [`experiments/01_durable_langgraph/`](../experiments/01_durable_langgraph/) |
 | HPX reproducers | [`bench/hpx_repro/`](../bench/hpx_repro/) |

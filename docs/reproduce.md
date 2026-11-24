@@ -24,9 +24,9 @@ Every result in [`docs/results/`](results/) comes from a script in this reposito
 | Environment | `. bench/setup/rostam_env.sh` | modules gcc 15.1.0, cmake 3.29.2, boost 1.91.0, hwloc 2.12.0, Python 3.12.3; sets `HPX_INSTALL`, `LANGX_VENV`, `LD_LIBRARY_PATH` |
 | HPX | `srun -p medusa -N1 --exclusive -t 02:00:00 bash bench/setup/build_hpx.sh` | HPX master `cc2be553` with supervision and the TCP parcelport; see the note in the script |
 | Python venv | `bash bench/setup/make_venv.sh` | pinned `requirements*.txt`; run on the login node |
-| langX build and tests | `sbatch bench/rostam_test.sbatch` | builds `_langx` and `langx_root`, runs unit and integration tests |
+| LangX build and tests | `sbatch bench/rostam_test.sbatch` | builds `_langx` and `langx_root`, runs unit and integration tests |
 
-Source `bench/setup/rostam_env.sh` in the shell before `sbatch`; Slurm passes the environment on. Every job script sources `bench/setup/rostam_env.sh` or loads the same modules, and reads `HPX_INSTALL` and `LANGX_VENV` from the environment. Jobs that need the langX build depend on the last step; chain them with `sbatch -d afterok:<job>`.
+Source `bench/setup/rostam_env.sh` in the shell before `sbatch`; Slurm passes the environment on. Every job script sources `bench/setup/rostam_env.sh` or loads the same modules, and reads `HPX_INSTALL` and `LANGX_VENV` from the environment. Jobs that need the LangX build depend on the last step; chain them with `sbatch -d afterok:<job>`.
 
 Versions on Rostam when the results were taken: HPX `cc2be553`, gcc 15.1.0, Python 3.12.3, and the pins in `requirements*.txt`: LangGraph 1.2.16, pybind11 3.1.0, pytest 9.1.1.
 
@@ -54,7 +54,7 @@ Phase 2 job 217757 (in-process re-init of a fenced worker) used an option that w
 
 ## Upstream reproducers
 
-The C++ reproducers attached to the HPX issues are in [`bench/hpx_repro/`](../bench/hpx_repro/). They need only an HPX install, not the langX build.
+The C++ reproducers attached to the HPX issues are in [`bench/hpx_repro/`](../bench/hpx_repro/). They need only an HPX install, not the LangX build.
 
 | Issue | Case | Command |
 | --- | --- | --- |

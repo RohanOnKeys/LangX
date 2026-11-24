@@ -1,6 +1,6 @@
-<p align="center"><img src="docs/assets/banner.png" alt="langX" width="100%"></p>
+<p align="center"><img src="docs/assets/banner.png" alt="LangX" width="100%"></p>
 
-# langX
+# LangX
 
 Research prototype: LangGraph agent steps executed on HPX localities, with HPX supervision fencing and a coordinator-side commit fence, so that a worker failure neither loses nor double-commits a step.
 
@@ -41,7 +41,7 @@ Upstream reports from these results: [hpx#7825](https://github.com/TheHPXProject
 
 Agent frameworks such as LangGraph checkpoint state between steps, but they leave failure handling for the processes that run those steps to the user. When a worker dies or freezes in the middle of a step, the framework can re-run the step, and any side effect the step already caused can happen twice.
 
-HPX now ships native locality supervision (`components/supervision_dispatch`): heartbeat-based failure detection, per-epoch terminal latching, and fenced dispatch that refuses work for a target already declared failed. langX asks whether that mechanism, plus a small commit fence on the coordinator, is enough to give a real agent framework these guarantees:
+HPX now ships native locality supervision (`components/supervision_dispatch`): heartbeat-based failure detection, per-epoch terminal latching, and fenced dispatch that refuses work for a target already declared failed. LangX asks whether that mechanism, plus a small commit fence on the coordinator, is enough to give a real agent framework these guarantees:
 
 - no committed step is lost when a worker is killed
 - no step is committed twice
@@ -78,7 +78,7 @@ A deterministic `research_agent` graph (stub LLM with recorded responses, parall
 
 Correctness gates: final state hash equal to a failure-free run, zero duplicate outbox effects, zero accepted stale commits, every run completes. Detection latency, recovery latency, dispatch overhead and scaling are reported alongside.
 
-## What langX does not claim
+## What LangX does not claim
 
 - No exactly-once guarantee for side effects a worker performs directly. Those are at-least-once unless the external system honors an idempotency key, and the results report this separately.
 - No recovery from loss of the HPX root.
@@ -88,7 +88,7 @@ Correctness gates: final state hash equal to a failure-free run, zero duplicate 
 
 ## Relationship to RayX and Ray
 
-langX builds on [RayX](https://github.com/byekrang/RayX), a research prototype in which Ray actors host HPX localities in-process. RayX experiment 70 established the supervision mechanism this project depends on: native detection of a killed locality, specific `target_fenced` dispatch outcomes, `force_disconnect`, and replacement localities, reproduced on HPX master `cc2be553`.
+LangX builds on [RayX](https://github.com/byekrang/RayX), a research prototype in which Ray actors host HPX localities in-process. RayX experiment 70 established the supervision mechanism this project depends on: native detection of a killed locality, specific `target_fenced` dispatch outcomes, `force_disconnect`, and replacement localities, reproduced on HPX master `cc2be553`.
 
 The core failure matrix runs without Ray, so that every recovery can be attributed to HPX supervision and the commit fence rather than to Ray actor restarts. Ray remains the intended outer layer: placement, and whole-island restart for failures HPX cannot recover from, such as loss of the root.
 

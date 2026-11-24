@@ -1,5 +1,5 @@
 #!/bin/bash
-# Build and install HPX at the commit every langX result used, with the
+# Build and install HPX at the commit every LangX result used, with the
 # options supervision needs. Run on a compute node, it takes a while:
 #   srun -p medusa -N1 --exclusive -t 02:00:00 bash bench/setup/build_hpx.sh
 # or as a batch job:
