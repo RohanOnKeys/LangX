@@ -2,6 +2,8 @@
 
 # langX
 
+Research prototype: LangGraph agent steps executed on HPX localities, with HPX supervision fencing and a coordinator-side commit fence, so that a worker failure neither loses nor double-commits a step.
+
 Codes used in this document (full list: [plan, codes](docs/plan.md#codes)):
 
 | Code | Meaning |
@@ -16,8 +18,6 @@ Codes used in this document (full list: [plan, codes](docs/plan.md#codes)):
 | F7 | coordinator crash: SIGKILL the coordinator mid-run; a new one resumes from the checkpoint |
 | F8 | slow, not dead: SIGSTOP a worker for less than the detection time, then SIGCONT |
 | F9 | abandoned dispatch: dispatch timeout shorter than the node; the original result arrives late |
-
-Research prototype: LangGraph agent steps executed on HPX localities, with HPX supervision fencing and a coordinator-side commit fence, so that a worker failure neither loses nor double-commits a step.
 
 **Status:** all phases are done. Report: [`docs/report.md`](docs/report.md). The full experiment plan is in [`docs/plan.md`](docs/plan.md).
 
