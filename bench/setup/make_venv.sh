@@ -1,5 +1,5 @@
 #!/bin/bash
-# Create the Python venv every langX job uses (Python 3.12.3 from the module),
+# Create the Python venv every LangX job uses (Python 3.12.3 from the module),
 # with the pinned runtime, build and test requirements. Run from the
 # repository root on the login node, which has network access:
 #   bash bench/setup/make_venv.sh

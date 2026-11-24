@@ -1,4 +1,4 @@
-"""Check that relative markdown links in langX resolve to existing files.
+"""Check that relative markdown links in LangX resolve to existing files.
 
 Covers README.md and every markdown file under docs/, experiments/,
 hpx_impl/, spikes/ and bench/. Links are resolved relative to the linking

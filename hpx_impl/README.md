@@ -1,6 +1,6 @@
 # hpx_impl
 
-Native C++ for the parts of langX that run outside Python.
+Native C++ for the parts of LangX that run outside Python.
 
 | Path | Purpose |
 | --- | --- |

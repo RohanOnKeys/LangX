@@ -1,4 +1,4 @@
-# Rostam environment for every langX build and job. Source it, do not run it:
+# Rostam environment for every LangX build and job. Source it, do not run it:
 #   . bench/setup/rostam_env.sh
 # HPX_INSTALL and LANGX_VENV keep any value already set.
 

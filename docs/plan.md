@@ -80,7 +80,7 @@ Status: phases 0 to 6 are done (results in [`docs/results/`](results/), report i
 | RayX README and exp70 (README, gap matrix, evidence index, Slice 3B sources) | Read | exp70 by Bita; reproduction on `cc2be553` by Rohan |
 | RayX exp66 | Partly | In-process hosting model and transport |
 | LangGraph runtime, checkpointer and durable execution docs | Read | Behavior needed here checked in spike D on 1.2.16 |
-| langX phase 0 to phase 5 results | Fully | [`phase0.md`](results/phase0.md), [`phase1.md`](results/phase1.md), [`phase2.md`](results/phase2.md), [`phase3.md`](results/phase3.md), [`phase4.md`](results/phase4.md), [`phase5.md`](results/phase5.md) |
+| LangX phase 0 to phase 5 results | Fully | [`phase0.md`](results/phase0.md), [`phase1.md`](results/phase1.md), [`phase2.md`](results/phase2.md), [`phase3.md`](results/phase3.md), [`phase4.md`](results/phase4.md), [`phase5.md`](results/phase5.md) |
 
 Rule: a statement marked **[VERIFY]** is an assumption that must be checked before code depends on it. Statements marked **[p0]** to **[p5]** were measured in that phase.
 
@@ -162,9 +162,9 @@ HPX supervision_dispatch + force_disconnect     (mechanism)
         ^
 exp70 Slice 3B harness and bindings             (Bita; reproduced on cc2be553)
         ^
-langX: _langx bindings, root membership action  (phases 0 and 1, done)
+LangX: _langx bindings, root membership action  (phases 0 and 1, done)
         ^
-langX: worker runtime, coordinator, commit fence, outbox, LangGraph proxies
+LangX: worker runtime, coordinator, commit fence, outbox, LangGraph proxies
 ```
 
 ---
@@ -206,7 +206,7 @@ langX: worker runtime, coordinator, commit fence, outbox, LangGraph proxies
 | Detection under load, poll timeout 500 ms | 0.99 to 1.59 s depending on the scenario, spread of a few ms within one; no healthy worker fenced in 300 trials | [p4] |
 | Detection against the poll timeout | Three poll windows: 746, 1496, 2997 ms at 250, 500, 1000 ms (F2, 30 trials each) | [p5] |
 | Detection and recovery across nodes | Within a few ms of one node for F1, F2, F4 to F6, F8, F9; F7 recovery 0.4 s longer | [p5] |
-| Dispatch across nodes | `dispatch_work` round trip 95.0 µs against 83.3 µs on one node; full langX dispatch 254.9 against 250.2 µs | [p5] |
+| Dispatch across nodes | `dispatch_work` round trip 95.0 µs against 83.3 µs on one node; full LangX dispatch 254.9 against 250.2 µs | [p5] |
 | F7 resume across nodes | A task committed by the old coordinator can run again (at most 2 per trial); its outbox key keeps the effect to one application | [p5] |
 
 ### 3.4 Gaps and how this design handles them
